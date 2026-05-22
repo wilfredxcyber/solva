@@ -60,9 +60,8 @@ const validationSchema = Yup.object({
     .min(2, "Sponsor name is too short")
     .required("Sponsor name is required"),
 
-  sponsorLogo: Yup.mixed().required("Sponsor logo is required"),
-
-  bannerImage: Yup.mixed().required("Banner image is required"),
+  sponsorLogo: Yup.mixed().nullable(),
+  bannerImage: Yup.mixed().nullable(),
 
   totalPool: Yup.number()
     .typeError("Reward pool must be a number")
@@ -380,336 +379,344 @@ export default function EditTaskPage({ taskId }: { taskId: string }) {
             }
           }}
         >
-          {({ values, errors, touched, setFieldValue, isSubmitting }) => (
-            <Form className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-              {/* LEFT */}
-              <div className="space-y-6">
-                <Card className="rounded-3xl border border-[#ECECEC] bg-white shadow-sm">
-                  <CardContent className="space-y-8 p-7">
-                    <div className="grid gap-5 md:grid-cols-2">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">
-                          Campaign Title
-                        </label>
+          {({ values, errors, touched, setFieldValue, isSubmitting }) => {
+            console.log(errors);
+            console.log(touched);
+            return (
+              <Form className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+                {/* LEFT */}
+                <div className="space-y-6">
+                  <Card className="rounded-3xl border border-[#ECECEC] bg-white shadow-sm">
+                    <CardContent className="space-y-8 p-7">
+                      <div className="grid gap-5 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">
+                            Campaign Title
+                          </label>
 
-                        <Field
-                          as={Input}
-                          name="title"
-                          className="h-12 rounded-xl"
-                        />
-
-                        <ErrorMessage
-                          name="title"
-                          component="p"
-                          className="text-sm text-red-500"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">
-                          Campaign Type
-                        </label>
-
-                        <Field
-                          as={Input}
-                          name="type"
-                          className="h-12 rounded-xl"
-                        />
-
-                        <ErrorMessage
-                          name="type"
-                          component="p"
-                          className="text-sm text-red-500"
-                        />
-                      </div>
-                    </div>
-
-                    {/* OVERVIEW */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">
-                        Campaign Overview
-                      </label>
-
-                      <Field
-                        as={Textarea}
-                        name="overview"
-                        className="min-h-[160px] rounded-2xl"
-                      />
-
-                      <ErrorMessage
-                        name="overview"
-                        component="p"
-                        className="text-sm text-red-500"
-                      />
-                    </div>
-
-                    {/* SPONSOR */}
-                    <div className="grid gap-5 md:grid-cols-2">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">
-                          Sponsor Name
-                        </label>
-
-                        <Field
-                          as={Input}
-                          name="sponsorName"
-                          className="h-12 rounded-xl"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">
-                          Reward Pool
-                        </label>
-
-                        <Field
-                          as={Input}
-                          name="totalPool"
-                          className="h-12 rounded-xl"
-                        />
-                      </div>
-                    </div>
-
-                    {/* SPOTS */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Total Spots</label>
-
-                      <Field
-                        as={Input}
-                        name="totalSpots"
-                        className="h-12 rounded-xl"
-                      />
-                    </div>
-
-                    {/* DATES */}
-                    <div className="grid gap-5 md:grid-cols-2">
-                      {/* START DATE */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">
-                          Start Date
-                        </label>
-
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <div
-                              className={cn(
-                                "flex h-12 w-full cursor-pointer items-center rounded-2xl border px-4",
-                                values.startDate
-                                  ? "text-black"
-                                  : "text-[#9A9A9A]",
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4 text-[#5427D7]" />
-
-                              {values.startDate
-                                ? format(values.startDate, "PPP")
-                                : "Select date"}
-                            </div>
-                          </PopoverTrigger>
-
-                          <PopoverContent>
-                            <Calendar
-                              mode="single"
-                              selected={values.startDate}
-                              onSelect={(date) =>
-                                setFieldValue("startDate", date)
-                              }
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-
-                      {/* END DATE */}
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">End Date</label>
-
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <div
-                              className={cn(
-                                "flex h-12 w-full cursor-pointer items-center rounded-2xl border px-4",
-                                values.endDate
-                                  ? "text-black"
-                                  : "text-[#9A9A9A]",
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4 text-[#5427D7]" />
-
-                              {values.endDate
-                                ? format(values.endDate, "PPP")
-                                : "Select date"}
-                            </div>
-                          </PopoverTrigger>
-
-                          <PopoverContent>
-                            <Calendar
-                              mode="single"
-                              selected={values.endDate}
-                              onSelect={(date) =>
-                                setFieldValue("endDate", date)
-                              }
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* ARRAYS */}
-                <Card className="rounded-3xl border border-[#ECECEC] bg-white shadow-sm">
-                  <CardContent className="space-y-10 p-7">
-                    {renderArrayField(
-                      "Requirements",
-                      "requirements",
-                      values,
-                      errors,
-                      touched,
-                    )}
-
-                    {renderArrayField(
-                      "Guidelines",
-                      "guidelines",
-                      values,
-                      errors,
-                      touched,
-                    )}
-
-                    {renderArrayField(
-                      "Selection Criteria",
-                      "selectionCriteria",
-                      values,
-                      errors,
-                      touched,
-                    )}
-
-                    {renderArrayField(
-                      "How To Submit",
-                      "howToSubmit",
-                      values,
-                      errors,
-                      touched,
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* RIGHT */}
-              <div className="space-y-6">
-                <Card className="sticky top-6 rounded-3xl border border-[#ECECEC] bg-white shadow-sm">
-                  <CardContent className="space-y-7 p-7">
-                    <div>
-                      <h2 className="text-xl font-semibold">Upload Assets</h2>
-                    </div>
-
-                    {/* LOGO */}
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium">
-                        Sponsor Logo
-                      </label>
-
-                      <label className="flex h-[190px] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-3xl border border-dashed bg-[#FAFAFA]">
-                        {logoPreview ? (
-                          <img
-                            src={logoPreview}
-                            alt="logo"
-                            className="h-full w-full object-cover"
+                          <Field
+                            as={Input}
+                            name="title"
+                            className="h-12 rounded-xl"
                           />
-                        ) : (
-                          <>
-                            <Upload className="mb-3 h-6 w-6 text-[#5427D7]" />
 
-                            <p>Upload Sponsor Logo</p>
-                          </>
-                        )}
-
-                        <input
-                          type="file"
-                          hidden
-                          accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-
-                            if (file) {
-                              setFieldValue("sponsorLogo", file);
-
-                              setLogoPreview(URL.createObjectURL(file));
-                            }
-                          }}
-                        />
-                      </label>
-                    </div>
-
-                    {/* BANNER */}
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium">
-                        Banner Image
-                      </label>
-
-                      <label className="flex h-[260px] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-3xl border border-dashed bg-[#FAFAFA]">
-                        {bannerPreview ? (
-                          <img
-                            src={bannerPreview}
-                            alt="banner"
-                            className="h-full w-full object-cover"
+                          <ErrorMessage
+                            name="title"
+                            component="p"
+                            className="text-sm text-red-500"
                           />
-                        ) : (
-                          <>
-                            <Upload className="mb-3 h-6 w-6 text-[#5427D7]" />
+                        </div>
 
-                            <p>Upload Banner</p>
-                          </>
-                        )}
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">
+                            Campaign Type
+                          </label>
 
-                        <input
-                          type="file"
-                          hidden
-                          accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
+                          <Field
+                            as={Input}
+                            name="type"
+                            className="h-12 rounded-xl"
+                          />
 
-                            if (file) {
-                              setFieldValue("bannerImage", file);
-
-                              setBannerPreview(URL.createObjectURL(file));
-                            }
-                          }}
-                        />
-                      </label>
-                    </div>
-
-                    {/* BUTTON */}
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="h-14 w-full rounded-2xl bg-[#5427D7] text-base font-semibold text-white"
-                    >
-                      {isSubmitting ? "Updating..." : "Update Campaign"}
-                    </Button>
-
-                    {/* ERROR SUMMARY */}
-                    {Object.keys(errors).length > 0 && (
-                      <div className="rounded-2xl border border-red-200 bg-red-50 p-4">
-                        <div className="flex items-start gap-3">
-                          <AlertCircle className="mt-0.5 h-5 w-5 text-red-500" />
-
-                          <div>
-                            <p className="font-medium text-red-700">
-                              Please fix the form errors
-                            </p>
-
-                            <p className="mt-1 text-sm text-red-500">
-                              Some required fields are missing.
-                            </p>
-                          </div>
+                          <ErrorMessage
+                            name="type"
+                            component="p"
+                            className="text-sm text-red-500"
+                          />
                         </div>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            </Form>
-          )}
+
+                      {/* OVERVIEW */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">
+                          Campaign Overview
+                        </label>
+
+                        <Field
+                          as={Textarea}
+                          name="overview"
+                          className="min-h-[160px] rounded-2xl"
+                        />
+
+                        <ErrorMessage
+                          name="overview"
+                          component="p"
+                          className="text-sm text-red-500"
+                        />
+                      </div>
+
+                      {/* SPONSOR */}
+                      <div className="grid gap-5 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">
+                            Sponsor Name
+                          </label>
+
+                          <Field
+                            as={Input}
+                            name="sponsorName"
+                            className="h-12 rounded-xl"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">
+                            Reward Pool
+                          </label>
+
+                          <Field
+                            as={Input}
+                            name="totalPool"
+                            className="h-12 rounded-xl"
+                          />
+                        </div>
+                      </div>
+
+                      {/* SPOTS */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">
+                          Total Spots
+                        </label>
+
+                        <Field
+                          as={Input}
+                          name="totalSpots"
+                          className="h-12 rounded-xl"
+                        />
+                      </div>
+
+                      {/* DATES */}
+                      <div className="grid gap-5 md:grid-cols-2">
+                        {/* START DATE */}
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">
+                            Start Date
+                          </label>
+
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <div
+                                className={cn(
+                                  "flex h-12 w-full cursor-pointer items-center rounded-2xl border px-4",
+                                  values.startDate
+                                    ? "text-black"
+                                    : "text-[#9A9A9A]",
+                                )}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4 text-[#5427D7]" />
+
+                                {values.startDate
+                                  ? format(values.startDate, "PPP")
+                                  : "Select date"}
+                              </div>
+                            </PopoverTrigger>
+
+                            <PopoverContent>
+                              <Calendar
+                                mode="single"
+                                selected={values.startDate}
+                                onSelect={(date) =>
+                                  setFieldValue("startDate", date)
+                                }
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+
+                        {/* END DATE */}
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">
+                            End Date
+                          </label>
+
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <div
+                                className={cn(
+                                  "flex h-12 w-full cursor-pointer items-center rounded-2xl border px-4",
+                                  values.endDate
+                                    ? "text-black"
+                                    : "text-[#9A9A9A]",
+                                )}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4 text-[#5427D7]" />
+
+                                {values.endDate
+                                  ? format(values.endDate, "PPP")
+                                  : "Select date"}
+                              </div>
+                            </PopoverTrigger>
+
+                            <PopoverContent>
+                              <Calendar
+                                mode="single"
+                                selected={values.endDate}
+                                onSelect={(date) =>
+                                  setFieldValue("endDate", date)
+                                }
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* ARRAYS */}
+                  <Card className="rounded-3xl border border-[#ECECEC] bg-white shadow-sm">
+                    <CardContent className="space-y-10 p-7">
+                      {renderArrayField(
+                        "Requirements",
+                        "requirements",
+                        values,
+                        errors,
+                        touched,
+                      )}
+
+                      {renderArrayField(
+                        "Guidelines",
+                        "guidelines",
+                        values,
+                        errors,
+                        touched,
+                      )}
+
+                      {renderArrayField(
+                        "Selection Criteria",
+                        "selectionCriteria",
+                        values,
+                        errors,
+                        touched,
+                      )}
+
+                      {renderArrayField(
+                        "How To Submit",
+                        "howToSubmit",
+                        values,
+                        errors,
+                        touched,
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* RIGHT */}
+                <div className="space-y-6">
+                  <Card className="sticky top-6 rounded-3xl border border-[#ECECEC] bg-white shadow-sm">
+                    <CardContent className="space-y-7 p-7">
+                      <div>
+                        <h2 className="text-xl font-semibold">Upload Assets</h2>
+                      </div>
+
+                      {/* LOGO */}
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium">
+                          Sponsor Logo
+                        </label>
+
+                        <label className="flex h-[190px] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-3xl border border-dashed bg-[#FAFAFA]">
+                          {logoPreview ? (
+                            <img
+                              src={logoPreview}
+                              alt="logo"
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <>
+                              <Upload className="mb-3 h-6 w-6 text-[#5427D7]" />
+
+                              <p>Upload Sponsor Logo</p>
+                            </>
+                          )}
+
+                          <input
+                            type="file"
+                            hidden
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+
+                              if (file) {
+                                setFieldValue("sponsorLogo", file);
+
+                                setLogoPreview(URL.createObjectURL(file));
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
+
+                      {/* BANNER */}
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium">
+                          Banner Image
+                        </label>
+
+                        <label className="flex h-[260px] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-3xl border border-dashed bg-[#FAFAFA]">
+                          {bannerPreview ? (
+                            <img
+                              src={bannerPreview}
+                              alt="banner"
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <>
+                              <Upload className="mb-3 h-6 w-6 text-[#5427D7]" />
+
+                              <p>Upload Banner</p>
+                            </>
+                          )}
+
+                          <input
+                            type="file"
+                            hidden
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+
+                              if (file) {
+                                setFieldValue("bannerImage", file);
+
+                                setBannerPreview(URL.createObjectURL(file));
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
+
+                      {/* BUTTON */}
+                      <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="h-14 w-full rounded-2xl bg-[#5427D7] text-base font-semibold text-white"
+                      >
+                        {isSubmitting ? "Updating..." : "Update Campaign"}
+                      </Button>
+
+                      {/* ERROR SUMMARY */}
+                      {Object.keys(errors).length > 0 && (
+                        <div className="rounded-2xl border border-red-200 bg-red-50 p-4">
+                          <div className="flex items-start gap-3">
+                            <AlertCircle className="mt-0.5 h-5 w-5 text-red-500" />
+
+                            <div>
+                              <p className="font-medium text-red-700">
+                                Please fix the form errors
+                              </p>
+
+                              <p className="mt-1 text-sm text-red-500">
+                                Some required fields are missing.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              </Form>
+            );
+          }}
         </Formik>
       </div>
     </div>
