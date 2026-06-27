@@ -6,9 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 
 import { CgLogOut } from "react-icons/cg";
-import { RiAdvertisementLine } from "react-icons/ri";
 import { IoIosNotifications } from "react-icons/io";
-import { GiThink } from "react-icons/gi";
 
 type NavItem = {
   title: string;
@@ -109,36 +107,9 @@ const SideNav = () => {
         </svg>
       ),
     },
+
     {
-      title: "Grants",
-      link: "grants",
-      svg: (isActive) => (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 33 20"
-          fill={isActive ? "none" : "#5427D7"}
-        >
-          <path
-            d="M15.0417 8.50008H17.9583C18.7319 8.50008 19.4737 8.19279 20.0207 7.64581C20.5677 7.09883 20.875 6.35696 20.875 5.58341C20.875 4.80987 20.5677 4.068 20.0207 3.52102C19.4737 2.97404 18.7319 2.66675 17.9583 2.66675H13.5833C12.7083 2.66675 11.9792 2.95842 11.5417 3.54175L3.375 11.4167"
-            stroke={isActive ? "black" : "white"}
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M9.20829 17.25L11.5416 15.2084C11.9791 14.625 12.7083 14.3334 13.5833 14.3334H19.4166C21.0208 14.3334 22.4791 13.75 23.5 12.5834L30.2083 6.1667C30.771 5.63488 31.0995 4.9013 31.1214 4.12732C31.1433 3.35334 30.8568 2.60237 30.325 2.03961C29.7931 1.47686 29.0596 1.14841 28.2856 1.12653C27.5116 1.10465 26.7606 1.39113 26.1979 1.92295L20.0729 7.61045M1.91663 9.95836L10.6666 18.7084"
-            stroke={isActive ? "black" : "white"}
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      ),
-    },
-    {
-      title: "Scholarships",
+      title: "Scholarships & Grants",
       link: "scholarships",
       svg: (isActive) => (
         <svg
@@ -168,12 +139,23 @@ const SideNav = () => {
       ),
     },
     {
-      title: "Innovations",
-      link: "innovation",
+      title: "Learn Courses",
+      link: "short-courses",
       svg: (isActive) => (
-        <GiThink
-          className={`${isActive ? "text-black" : "text-white"} text-2xl`}
-        />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={isActive ? "black" : "white"}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+        </svg>
       ),
     },
     {
@@ -213,15 +195,7 @@ const SideNav = () => {
         </svg>
       ),
     },
-    {
-      title: "Advert Dashboard",
-      link: "advert",
-      svg: (isActive) => (
-        <RiAdvertisementLine
-          className={`${isActive ? "text-black" : "text-white"} text-2xl`}
-        />
-      ),
-    },
+
     {
       title: "Notification",
       link: "notification",
