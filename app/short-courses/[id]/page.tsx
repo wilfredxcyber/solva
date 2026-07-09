@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useRef, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
 import {
   X,
   UploadCloud,
@@ -11,8 +11,10 @@ import {
   Rocket,
 } from "lucide-react";
 
-const CreateShortCourse = () => {
+const EditShortCourse = () => {
   const router = useRouter();
+  const params = useParams();
+  const courseId = params?.id as string;
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
@@ -30,7 +32,34 @@ const CreateShortCourse = () => {
     certificate: false,
   });
 
+  const [loading, setLoading] = useState(true);
   const [dragging, setDragging] = useState(false);
+
+  useEffect(() => {
+    if (!courseId) return;
+    const existingStr = localStorage.getItem("solva_courses");
+    if (existingStr) {
+      const allCourses = JSON.parse(existingStr);
+      const course = allCourses.find((c: any) => c.id === courseId);
+      if (course) {
+        setForm({
+          title: course.title || course.name || "",
+          category: course.category || "Design & Creative",
+          difficulty: course.difficulty || "",
+          description: course.description || "",
+          thumbnail: null,
+          thumbnailPreview: course.thumbnail || null,
+          startLearningLink: course.startLearningLink || "",
+          isFree: course.isFree !== undefined ? course.isFree : (course.price === null || course.price === 0),
+          regularPrice: course.regularPrice || (course.price ? String(course.price) : ""),
+          discountedPrice: course.discountedPrice || "",
+          duration: course.duration || "",
+          certificate: course.certificate || false,
+        });
+      }
+    }
+    setLoading(false);
+  }, [courseId]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -64,20 +93,27 @@ const CreateShortCourse = () => {
       return;
     }
 
-    const newCourse = {
-      id: Date.now().toString(),
-      ...form,
-      price: form.isFree ? null : Number(form.regularPrice) || 0,
-      enrollment: 0,
-      thumbnail: form.thumbnailPreview || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=80&h=80&fit=crop",
-      status,
-      createdAt: new Date().toISOString(),
-    };
+    const existingStr = localStorage.getItem("solva_courses") || "[]";
+    const existing = JSON.parse(existingStr);
 
-    const existing = JSON.parse(localStorage.getItem("solva_courses") || "[]");
-    localStorage.setItem("solva_courses", JSON.stringify([newCourse, ...existing]));
+    const updatedCourses = existing.map((c: any) => {
+      if (c.id === courseId) {
+        return {
+          ...c,
+          ...form,
+          name: form.title, // Keep consistent with table expectations
+          price: form.isFree ? null : Number(form.regularPrice) || 0,
+          thumbnail: form.thumbnailPreview || c.thumbnail || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=80&h=80&fit=crop",
+          status,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      return c;
+    });
+
+    localStorage.setItem("solva_courses", JSON.stringify(updatedCourses));
     
-    alert(`Course ${status === "Published" ? "published" : "saved as draft"} successfully!`);
+    alert(`Course updated successfully!`);
     router.push("/short-courses");
   };
 
@@ -85,14 +121,18 @@ const CreateShortCourse = () => {
     router.push("/short-courses");
   };
 
+  if (loading) {
+    return <div className="min-h-screen bg-[#FAF8F8] flex items-center justify-center">Loading...</div>;
+  }
+
   return (
     <div className="min-h-screen bg-[#FAF8F8] flex flex-col">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 px-4 sm:px-8 pt-6 sm:pt-8 pb-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Create New Course</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Edit Course</h1>
           <p className="text-xs sm:text-sm text-gray-500 mt-1">
-            Set up your educational content with Lumina's premium course builder.
+            Update your course details and settings.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -106,7 +146,7 @@ const CreateShortCourse = () => {
             onClick={() => handleSave("Published")}
             className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm"
           >
-            Save Course
+            Update Course
           </button>
         </div>
       </div>
@@ -416,8 +456,8 @@ const CreateShortCourse = () => {
           onClick={handleDiscard}
           className="flex items-center justify-center gap-2 text-sm text-gray-500 hover:text-red-500 transition-colors py-2"
         >
-          <Trash2 className="w-4 h-4" />
-          Discard Draft
+          <X className="w-4 h-4" />
+          Cancel Changes
         </button>
         <button 
           onClick={() => handleSave("Draft")}
@@ -430,11 +470,11 @@ const CreateShortCourse = () => {
           className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm"
         >
           <Rocket className="w-4 h-4" />
-          Publish Course
+          Update Course
         </button>
       </div>
     </div>
   );
 };
 
-export default CreateShortCourse;
+export default EditShortCourse;
