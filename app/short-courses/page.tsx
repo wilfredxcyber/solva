@@ -67,7 +67,7 @@ const ShortCourses = () => {
     setOpenMenuId(openMenuId === id ? null : id);
   };
 
-  const renderDesktopRow = (course: Course) => (
+  const renderDesktopRow = (course: any) => (
     <tr key={course.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
       <td className="py-4 px-6">
         <div className="flex items-center gap-3">
