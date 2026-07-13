@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MoreVertical, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { useCourses } from "./useCourses";
 
 type Course = {
   id: string;
@@ -13,46 +14,6 @@ type Course = {
   thumbnail: string;
 };
 
-// Initial mock data if empty
-const mockCourses: Course[] = [
-  {
-    id: "1",
-    name: "Smartphone Video Editing",
-    category: "Marketing",
-    price: null,
-    enrollment: 450,
-    status: "Published",
-    thumbnail: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=80&h=80&fit=crop",
-  },
-  {
-    id: "2",
-    name: "Digital Marketing",
-    category: "Marketing",
-    price: 45000,
-    enrollment: 320,
-    status: "Published",
-    thumbnail: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=80&h=80&fit=crop",
-  },
-  {
-    id: "3",
-    name: "Coding for Beginners",
-    category: "Coding",
-    price: 60000,
-    enrollment: 580,
-    status: "Published",
-    thumbnail: "https://images.unsplash.com/photo-1484417894907-623942c8ee29?w=80&h=80&fit=crop",
-  },
-  {
-    id: "4",
-    name: "Graphic Design",
-    category: "Design",
-    price: 35000,
-    enrollment: 100,
-    status: "Draft",
-    thumbnail: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=80&h=80&fit=crop",
-  },
-];
-
 const ITEMS_PER_PAGE = 5;
 
 const ShortCourses = () => {
@@ -60,41 +21,28 @@ const ShortCourses = () => {
   const [activeTab, setActiveTab] = useState<"Published" | "Draft">("Published");
   const [currentPage, setCurrentPage] = useState(1);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const [courses, setCourses] = useState<Course[]>([]);
+  const { fetched, fetchCourses, deleteCourse, editCourse, loadFetch } = useCourses();
 
   useEffect(() => {
-    // Load courses from localStorage
-    const stored = localStorage.getItem("solva_courses");
-    if (stored) {
-      setCourses(JSON.parse(stored));
-    } else {
-      setCourses(mockCourses);
-      localStorage.setItem("solva_courses", JSON.stringify(mockCourses));
-    }
+    fetchCourses();
   }, []);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this course?")) {
-      const updated = courses.filter((c) => c.id !== id);
-      setCourses(updated);
-      localStorage.setItem("solva_courses", JSON.stringify(updated));
+      await deleteCourse(id);
     }
     setOpenMenuId(null);
   };
 
-  const handlePublishToggle = (id: string) => {
-    const updated = courses.map((c) => {
-      if (c.id === id) {
-        return { ...c, status: c.status === "Published" ? "Draft" : "Published" } as Course;
-      }
-      return c;
-    });
-    setCourses(updated);
-    localStorage.setItem("solva_courses", JSON.stringify(updated));
+  const handlePublishToggle = async (course: any) => {
+    const newStatus = course.status === "Published" ? "Draft" : "Published";
+    await editCourse({ ...course, status: newStatus });
+    // Re-fetch courses to get the latest status
+    fetchCourses();
     setOpenMenuId(null);
   };
 
-  const filteredCourses = courses.filter((c) => c.status === activeTab);
+  const filteredCourses = fetched.filter((c: any) => (c.status || "Published") === activeTab);
   const TOTAL_ENTRIES = filteredCourses.length;
   const totalPages = Math.max(1, Math.ceil(TOTAL_ENTRIES / ITEMS_PER_PAGE));
 
@@ -149,7 +97,7 @@ const ShortCourses = () => {
         {openMenuId === course.id && (
           <div className="absolute right-6 top-8 z-50 bg-white border border-gray-200 rounded-xl shadow-lg py-1 min-w-[140px]">
             <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" onClick={() => router.push(`/short-courses/${course.id}`)}>Edit Course</button>
-            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" onClick={() => handlePublishToggle(course.id)}>{course.status === "Published" ? "Unpublish" : "Publish"}</button>
+            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" onClick={() => handlePublishToggle(course)}>{course.status === "Published" ? "Unpublish" : "Publish"}</button>
             <button className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors" onClick={() => handleDelete(course.id)}>Delete</button>
           </div>
         )}
@@ -157,7 +105,7 @@ const ShortCourses = () => {
     </tr>
   );
 
-  const renderMobileCard = (course: Course) => (
+  const renderMobileCard = (course: any) => (
     <div key={course.id} className="p-4 hover:bg-gray-50 transition-colors">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -174,7 +122,7 @@ const ShortCourses = () => {
           {openMenuId === course.id && (
             <div className="absolute right-0 top-8 z-50 bg-white border border-gray-200 rounded-xl shadow-lg py-1 min-w-[140px]">
               <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => router.push(`/short-courses/${course.id}`)}>Edit Course</button>
-              <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => handlePublishToggle(course.id)}>{course.status === "Published" ? "Unpublish" : "Publish"}</button>
+              <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => handlePublishToggle(course)}>{course.status === "Published" ? "Unpublish" : "Publish"}</button>
               <button className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50" onClick={() => handleDelete(course.id)}>Delete</button>
             </div>
           )}
@@ -247,7 +195,12 @@ const ShortCourses = () => {
           </span>
         </div>
 
-        {TOTAL_ENTRIES === 0 ? (
+        {loadFetch ? (
+          <div className="p-16 text-center text-gray-500 flex flex-col items-center justify-center">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
+            <p>Loading {activeTab.toLowerCase()} courses...</p>
+          </div>
+        ) : TOTAL_ENTRIES === 0 ? (
           <div className="p-8 text-center text-gray-500">
             <p>No {activeTab.toLowerCase()} courses found.</p>
           </div>

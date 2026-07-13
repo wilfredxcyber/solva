@@ -10,9 +10,11 @@ import {
   Trash2,
   Rocket,
 } from "lucide-react";
+import { useCourses } from "../useCourses";
 
 const CreateShortCourse = () => {
   const router = useRouter();
+  const { createCourse, loading } = useCourses();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
@@ -58,27 +60,30 @@ const CreateShortCourse = () => {
     if (file) handleFile(file);
   };
 
-  const handleSave = (status: "Published" | "Draft") => {
+  const handleSave = async (status: "Published" | "Draft") => {
     if (!form.title.trim()) {
       alert("Course title is required");
       return;
     }
 
-    const newCourse = {
-      id: Date.now().toString(),
-      ...form,
+    const courseData = {
+      name: form.title,
+      category: form.category,
+      difficulty: form.difficulty,
+      description: form.description,
+      link: form.startLearningLink,
+      isFree: form.isFree,
       price: form.isFree ? null : Number(form.regularPrice) || 0,
+      regularPrice: form.regularPrice,
+      discountedPrice: form.discountedPrice,
+      duration: form.duration,
+      certificate: form.certificate,
       enrollment: 0,
       thumbnail: form.thumbnailPreview || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=80&h=80&fit=crop",
       status,
-      createdAt: new Date().toISOString(),
     };
 
-    const existing = JSON.parse(localStorage.getItem("solva_courses") || "[]");
-    localStorage.setItem("solva_courses", JSON.stringify([newCourse, ...existing]));
-    
-    alert(`Course ${status === "Published" ? "published" : "saved as draft"} successfully!`);
-    router.push("/short-courses");
+    await createCourse(courseData);
   };
 
   const handleDiscard = () => {
@@ -104,9 +109,10 @@ const CreateShortCourse = () => {
           </button>
           <button 
             onClick={() => handleSave("Published")}
-            className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm"
+            disabled={loading}
+            className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-70"
           >
-            Save Course
+            {loading ? "Saving..." : "Save Course"}
           </button>
         </div>
       </div>
@@ -420,18 +426,20 @@ const CreateShortCourse = () => {
           Discard Draft
         </button>
         <button 
-          onClick={() => handleSave("Draft")}
-          className="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
-        >
-          Save as Draft
-        </button>
-        <button 
-          onClick={() => handleSave("Published")}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm"
-        >
-          <Rocket className="w-4 h-4" />
-          Publish Course
-        </button>
+            onClick={() => handleSave("Draft")}
+            disabled={loading}
+            className="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-70"
+          >
+            Save as Draft
+          </button>
+          <button 
+            onClick={() => handleSave("Published")}
+            disabled={loading}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-70"
+          >
+            <Rocket className="w-4 h-4" />
+            {loading ? "Publishing..." : "Publish Course"}
+          </button>
       </div>
     </div>
   );

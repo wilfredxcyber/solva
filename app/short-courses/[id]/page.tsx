@@ -10,11 +10,13 @@ import {
   Trash2,
   Rocket,
 } from "lucide-react";
+import { useCourses } from "../useCourses";
 
 const EditShortCourse = () => {
   const router = useRouter();
   const params = useParams();
   const courseId = params?.id as string;
+  const { fetched, fetchCourses, editCourse, loadFetch, editLoad } = useCourses();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
@@ -36,30 +38,32 @@ const EditShortCourse = () => {
   const [dragging, setDragging] = useState(false);
 
   useEffect(() => {
-    if (!courseId) return;
-    const existingStr = localStorage.getItem("solva_courses");
-    if (existingStr) {
-      const allCourses = JSON.parse(existingStr);
-      const course = allCourses.find((c: any) => c.id === courseId);
-      if (course) {
-        setForm({
-          title: course.title || course.name || "",
-          category: course.category || "Design & Creative",
-          difficulty: course.difficulty || "",
-          description: course.description || "",
-          thumbnail: null,
-          thumbnailPreview: course.thumbnail || null,
-          startLearningLink: course.startLearningLink || "",
-          isFree: course.isFree !== undefined ? course.isFree : (course.price === null || course.price === 0),
-          regularPrice: course.regularPrice || (course.price ? String(course.price) : ""),
-          discountedPrice: course.discountedPrice || "",
-          duration: course.duration || "",
-          certificate: course.certificate || false,
-        });
-      }
+    if (courseId) {
+      fetchCourses();
     }
-    setLoading(false);
   }, [courseId]);
+
+  useEffect(() => {
+    if (!courseId || fetched.length === 0) return;
+    
+    const course = fetched.find((c: any) => c.id === courseId || c._id === courseId);
+    if (course) {
+      setForm({
+        title: course.name || "",
+        category: course.category || "Design & Creative",
+        difficulty: course.difficulty || "",
+        description: course.description || "",
+        thumbnail: null,
+        thumbnailPreview: course.thumbnail || null,
+        startLearningLink: course.link || "",
+        isFree: course.isFree !== undefined ? course.isFree : (course.price === null || course.price === 0),
+        regularPrice: course.regularPrice || (course.price ? String(course.price) : ""),
+        discountedPrice: course.discountedPrice || "",
+        duration: course.duration || "",
+        certificate: course.certificate || false,
+      });
+    }
+  }, [fetched, courseId]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -87,42 +91,38 @@ const EditShortCourse = () => {
     if (file) handleFile(file);
   };
 
-  const handleSave = (status: "Published" | "Draft") => {
+  const handleSave = async (status: "Published" | "Draft") => {
     if (!form.title.trim()) {
       alert("Course title is required");
       return;
     }
 
-    const existingStr = localStorage.getItem("solva_courses") || "[]";
-    const existing = JSON.parse(existingStr);
+    const courseData = {
+      id: courseId,
+      name: form.title,
+      category: form.category,
+      difficulty: form.difficulty,
+      description: form.description,
+      link: form.startLearningLink,
+      isFree: form.isFree,
+      price: form.isFree ? null : Number(form.regularPrice) || 0,
+      regularPrice: form.regularPrice,
+      discountedPrice: form.discountedPrice,
+      duration: form.duration,
+      certificate: form.certificate,
+      thumbnail: form.thumbnailPreview || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=80&h=80&fit=crop",
+      status,
+    };
 
-    const updatedCourses = existing.map((c: any) => {
-      if (c.id === courseId) {
-        return {
-          ...c,
-          ...form,
-          name: form.title, // Keep consistent with table expectations
-          price: form.isFree ? null : Number(form.regularPrice) || 0,
-          thumbnail: form.thumbnailPreview || c.thumbnail || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=80&h=80&fit=crop",
-          status,
-          updatedAt: new Date().toISOString(),
-        };
-      }
-      return c;
-    });
-
-    localStorage.setItem("solva_courses", JSON.stringify(updatedCourses));
-    
-    alert(`Course updated successfully!`);
-    router.push("/short-courses");
+    await editCourse(courseData);
   };
 
   const handleDiscard = () => {
     router.push("/short-courses");
   };
 
-  if (loading) {
-    return <div className="min-h-screen bg-[#FAF8F8] flex items-center justify-center">Loading...</div>;
+  if (loadFetch) {
+    return <div className="min-h-screen bg-[#FAF8F8] flex items-center justify-center">Loading course...</div>;
   }
 
   return (
@@ -144,9 +144,10 @@ const EditShortCourse = () => {
           </button>
           <button 
             onClick={() => handleSave("Published")}
-            className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm"
+            disabled={editLoad}
+            className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-70"
           >
-            Update Course
+            {editLoad ? "Updating..." : "Update Course"}
           </button>
         </div>
       </div>
@@ -461,16 +462,18 @@ const EditShortCourse = () => {
         </button>
         <button 
           onClick={() => handleSave("Draft")}
-          className="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
+          disabled={editLoad}
+          className="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-70"
         >
           Save as Draft
         </button>
         <button 
           onClick={() => handleSave("Published")}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm"
+          disabled={editLoad}
+          className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-70"
         >
           <Rocket className="w-4 h-4" />
-          Update Course
+          {editLoad ? "Updating..." : "Update Course"}
         </button>
       </div>
     </div>
