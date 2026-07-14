@@ -18,5 +18,5 @@ export const apis = {
   project: `${baseURL}/projects`,
   slider: `${baseURL}/slider`,
   notification: `${baseURL}/notification`,
-  course: `${baseURL}/short-courses`,
+  course: `${baseURL}/courses`,
 };

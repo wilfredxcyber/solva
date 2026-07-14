@@ -37,7 +37,7 @@ export const useCourses = () => {
     try {
       const token = Cookies.get("accessToken");
 
-      const response = await axios.post(`${apis.course}/create`, courseData);
+      const response = await axios.post(`${apis.course}`, courseData);
 
       if (response.status === 200 || response.status === 201) {
         toast.success(`Course ${courseData.status === "Published" ? "published" : "saved as draft"} successfully!`);
