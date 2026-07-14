@@ -36,8 +36,8 @@ export const useCourses = () => {
     setLoading(true);
     try {
       const token = Cookies.get("accessToken");
-      // Use the innovations endpoint for short courses as requested
-      const response = await axios.post(`${apis.inno}/create`, courseData);
+
+      const response = await axios.post(`${apis.course}/create`, courseData);
 
       if (response.status === 200 || response.status === 201) {
         toast.success(`Course ${courseData.status === "Published" ? "published" : "saved as draft"} successfully!`);
@@ -65,7 +65,7 @@ export const useCourses = () => {
     setEditLoad(true);
     try {
       const token = Cookies.get("accessToken");
-      const response = await axios.patch(`${apis.inno}/${targetId}`, courseData);
+      const response = await axios.patch(`${apis.course}/${targetId}`, courseData);
 
       if (response.status === 200) {
         toast.success("Course updated successfully");
@@ -85,7 +85,7 @@ export const useCourses = () => {
   const fetchCourses = async () => {
     try {
       const token = Cookies.get("accessToken");
-      const response = await axios.get(`${apis.inno}`, {
+      const response = await axios.get(`${apis.course}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -114,7 +114,7 @@ export const useCourses = () => {
     try {
       setDelCourseLoad(true);
       const token = Cookies.get("accessToken");
-      const response = await axios.delete(`${apis.inno}/${id}`, {
+      const response = await axios.delete(`${apis.course}/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
