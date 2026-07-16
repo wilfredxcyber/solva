@@ -72,6 +72,7 @@ const CreateShortCourse = () => {
       link: form.startLearningLink,
       isFree: form.isFree,
       price: form.isFree ? null : Number(form.regularPrice) || 0,
+      hasCertificate: form.certificate,
       status,
     };
 
