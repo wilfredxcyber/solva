@@ -106,8 +106,6 @@ const EditShortCourse = () => {
       link: form.startLearningLink,
       isFree: form.isFree,
       price: form.isFree ? null : Number(form.regularPrice) || 0,
-      regularPrice: form.regularPrice,
-      discountedPrice: form.discountedPrice,
       duration: form.duration,
       certificate: form.certificate,
       thumbnail: form.thumbnailPreview || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=80&h=80&fit=crop",
