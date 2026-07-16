@@ -68,16 +68,10 @@ const CreateShortCourse = () => {
 
     const courseData = {
       name: form.title,
-      category: form.category,
-      difficulty: form.difficulty,
       description: form.description,
       link: form.startLearningLink,
       isFree: form.isFree,
       price: form.isFree ? null : Number(form.regularPrice) || 0,
-      duration: form.duration,
-      certificate: form.certificate,
-      enrollment: 0,
-      thumbnail: form.thumbnailPreview || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=80&h=80&fit=crop",
       status,
     };
 
