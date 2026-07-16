@@ -46,6 +46,8 @@ export const useCourses = () => {
       }
     } catch (error: any) {
       const err = error as AxiosError<{ message?: string }>;
+      console.error("BACKEND ERROR DETAILS:", err.response?.data);
+      alert(`Backend Validation Error:\n\n${JSON.stringify(err.response?.data, null, 2)}`);
       toast.error(err.response?.data?.message || "Something went wrong while creating the course");
     } finally {
       setLoading(false);
