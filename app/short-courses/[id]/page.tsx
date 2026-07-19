@@ -102,34 +102,44 @@ const EditShortCourse = () => {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("name", form.title);
-    formData.append("category", form.category);
-    formData.append("difficulty", form.difficulty || "Beginner");
-    formData.append("description", form.description);
-    formData.append("link", form.startLearningLink);
-    formData.append("duration", form.duration ? String(form.duration) : "0");
-    formData.append("price", form.regularPrice ? String(form.regularPrice) : "0");
-    formData.append("discountPrice", form.discountedPrice ? String(form.discountedPrice) : "0");
-    formData.append("status", publishStatus);
-    
-    // Send as strings, backend must coerce to boolean
-    formData.append("isFree", form.isFree ? "true" : "false");
-    formData.append("hasCertificate", form.certificate ? "true" : "false");
-
-    // Only append thumbnail if user actually picked a new file (or we have a valid string URL to send back)
+    // If there's a new thumbnail to upload, we MUST use FormData
     if (form.thumbnail) {
+      const formData = new FormData();
+      formData.append("name", form.title);
+      formData.append("category", form.category);
+      formData.append("difficulty", form.difficulty || "Beginner");
+      formData.append("description", form.description);
+      formData.append("link", form.startLearningLink);
+      formData.append("duration", form.duration ? String(form.duration) : "0");
+      formData.append("price", form.regularPrice ? String(form.regularPrice) : "0");
+      formData.append("discountPrice", form.discountedPrice ? String(form.discountedPrice) : "0");
+      formData.append("status", publishStatus);
+      formData.append("isFree", form.isFree ? "true" : "false");
+      formData.append("hasCertificate", form.certificate ? "true" : "false");
       formData.append("thumbnail", form.thumbnail);
-    } else if (form.thumbnailPreview && form.thumbnailPreview.startsWith("http")) {
-      formData.append("thumbnail", form.thumbnailPreview);
-    }
 
-    const entries = Object.fromEntries(formData.entries());
-    if (!window.confirm(`Debug Payload (Screenshot this!):\n${JSON.stringify(entries, null, 2)}`)) {
-      return;
-    }
+      await editCourse({ id: courseId, formData } as any);
+    } else {
+      // Otherwise, send pure JSON to avoid multipart parsing bugs on backend PATCH
+      const jsonPayload = {
+        name: form.title,
+        category: form.category,
+        difficulty: form.difficulty || "Beginner",
+        description: form.description,
+        link: form.startLearningLink,
+        duration: form.duration ? String(form.duration) : "0",
+        price: form.regularPrice ? String(form.regularPrice) : "0",
+        discountPrice: form.discountedPrice ? String(form.discountedPrice) : "0",
+        status: publishStatus,
+        isFree: Boolean(form.isFree),
+        hasCertificate: Boolean(form.certificate),
+      };
 
-    await editCourse({ id: courseId, formData } as any);
+      if (!window.confirm(`Sending JSON Payload:\n${JSON.stringify(jsonPayload, null, 2)}`)) {
+        return;
+      }
+      await editCourse({ id: courseId, ...jsonPayload } as any);
+    }
   };
 
   const handleDiscard = () => {
