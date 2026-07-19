@@ -479,21 +479,207 @@ const EditShortCourse = () => {
         </button>
         <button 
           onClick={() => handleSave("published")}
+              {/* Price + Duration Fields */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+                <div className="flex-1">
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                    Regular Price (₦)
+                  </label>
+                  <div className="flex items-center border border-gray-200 rounded-lg px-3 py-2.5 gap-2 focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary transition">
+                    <span className="text-green-600 font-semibold text-sm">₦</span>
+                    <input
+                      type="number"
+                      name="regularPrice"
+                      value={form.regularPrice}
+                      onChange={handleChange}
+                      placeholder="0.00"
+                      disabled={form.isFree}
+                      className="flex-1 text-sm text-gray-700 placeholder-gray-400 focus:outline-none disabled:opacity-50 bg-transparent"
+                    />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                    Discounted Price (₦)
+                  </label>
+                  <div className="flex items-center border border-gray-200 rounded-lg px-3 py-2.5 gap-2 focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary transition">
+                    <span className="text-green-600 font-semibold text-sm">₦</span>
+                    <input
+                      type="number"
+                      name="discountedPrice"
+                      value={form.discountedPrice}
+                      onChange={handleChange}
+                      placeholder="0.00"
+                      disabled={form.isFree}
+                      className="flex-1 text-sm text-gray-700 placeholder-gray-400 focus:outline-none disabled:opacity-50 bg-transparent"
+                    />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
+                    Duration (Hours)
+                  </label>
+                  <div className="flex items-center border border-gray-200 rounded-lg px-3 py-2.5 gap-2 focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary transition">
+                    <input
+                      type="number"
+                      name="duration"
+                      value={form.duration}
+                      onChange={handleChange}
+                      placeholder="e.g. 12"
+                      className="flex-1 text-sm text-gray-700 placeholder-gray-400 focus:outline-none bg-transparent"
+                    />
+                    <Clock className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Certificate */}
+              <label
+                className={`flex items-start gap-4 px-4 py-3.5 rounded-xl cursor-pointer border transition-colors ${
+                  form.certificate
+                    ? "bg-primary/5 border-primary/20"
+                    : "bg-gray-50 border-gray-100"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={form.certificate}
+                  onChange={(e) =>
+                    setForm((p) => ({ ...p, certificate: e.target.checked }))
+                  }
+                  className="mt-0.5 w-4 h-4 rounded accent-primary flex-shrink-0"
+                />
+                <div>
+                  <p className="text-sm font-semibold text-gray-800">
+                    Enable Certificate of Completion
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Learners will receive a digital Lumina certificate upon finishing all modules.
+                  </p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          {/* Right Column — Course Media */}
+          <div className="w-full lg:w-72 lg:flex-shrink-0">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 lg:sticky lg:top-6">
+              <div className="flex items-center gap-2 mb-5">
+                <span className="text-lg">🎬</span>
+                <h2 className="text-base font-bold text-gray-900">Course Media</h2>
+              </div>
+
+              {/* Thumbnail Upload */}
+              <div className="mb-5">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Course Thumbnail
+                </label>
+
+                {form.thumbnailPreview ? (
+                  <div className="relative rounded-xl overflow-hidden border border-gray-200">
+                    <img
+                      src={form.thumbnailPreview}
+                      alt="Thumbnail preview"
+                      className="w-full h-40 object-cover"
+                    />
+                    <button
+                      onClick={() =>
+                        setForm((p) => ({
+                          ...p,
+                          thumbnail: null,
+                          thumbnailPreview: null,
+                        }))
+                      }
+                      className="absolute top-2 right-2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-red-50 transition-colors"
+                    >
+                      <X className="w-4 h-4 text-gray-600" />
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setDragging(true);
+                    }}
+                    onDragLeave={() => setDragging(false)}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`border-2 border-dashed rounded-xl flex flex-col items-center justify-center py-8 px-4 cursor-pointer transition-colors ${
+                      dragging
+                        ? "border-primary bg-primary/5"
+                        : "border-gray-200 hover:border-primary/50 hover:bg-gray-50"
+                    }`}
+                  >
+                    <UploadCloud className="w-10 h-10 text-primary mb-2" />
+                    <p className="text-sm font-medium text-gray-700 text-center">
+                      Drop image here
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1 text-center">
+                      PNG, JPG or WEBP (Max 2MB)
+                    </p>
+                    <button
+                      type="button"
+                      className="mt-3 px-4 py-1.5 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+                    >
+                      Browse Files
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      className="hidden"
+                      onChange={handleFileInput}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Start Learning Link */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Start learning Link
+                </label>
+                <div className="flex items-center border border-gray-200 rounded-lg px-3 py-2.5 gap-2 focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary transition">
+                  <Link2 className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <input
+                    type="url"
+                    name="startLearningLink"
+                    value={form.startLearningLink}
+                    onChange={handleChange}
+                    placeholder="https://youtube.com/..."
+                    className="flex-1 text-sm text-gray-700 placeholder-gray-400 focus:outline-none bg-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Footer */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-4 sm:px-8 py-3 sm:py-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2 sm:gap-4 z-40">
+        <button
+          onClick={handleDiscard}
+          className="flex items-center justify-center gap-2 text-sm text-gray-500 hover:text-red-500 transition-colors py-2"
+        >
+          <X className="w-4 h-4" />
+          Cancel Changes
+        </button>
+        <button 
+          onClick={() => handleSave("draft")}
+          disabled={editLoad}
+          className="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-70"
+        >
+          Save as Draft
+        </button>
+        <button 
+          onClick={() => handleSave("published")}
           disabled={editLoad}
           className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-70"
         >
           <Rocket className="w-4 h-4" />
           {editLoad ? "Updating..." : "Update Course"}
         </button>
-      </div>
-
-      {/* DEBUG PANEL */}
-      <div className="fixed bottom-0 left-0 right-0 bg-black text-white p-4 text-xs font-mono z-50 overflow-auto max-h-48 opacity-90">
-        <p><strong>DEBUG INFO:</strong></p>
-        <p>URL ID: {courseId}</p>
-        <p>Fetched count: {fetched.length}</p>
-        <p>Fetched IDs: {fetched.map((c:any) => c.id || c._id).join(", ")}</p>
-        <p>Current Form Title: {form.title}</p>
       </div>
     </div>
   );
