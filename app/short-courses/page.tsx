@@ -38,17 +38,27 @@ const ShortCourses = () => {
     const isPublished = course.status?.toLowerCase() === "published";
     const newStatus = isPublished ? "draft" : "published";
     
-    // Convert to FormData to match the backend's multipart/form-data expectations
+    // Convert to FormData but only include fields the backend schema expects
+    const allowedKeys = [
+      "name", "category", "difficulty", "description", 
+      "link", "duration", "price", "discountPrice", 
+      "isFree", "hasCertificate", "thumbnail"
+    ];
+
     const formData = new FormData();
-    Object.keys(course).forEach(key => {
-      if (course[key] !== null && course[key] !== undefined) {
-        if (typeof course[key] === "boolean") {
-          formData.append(key, course[key] ? "true" : "false");
+    allowedKeys.forEach(key => {
+      // Map frontend fields to backend names if they differ
+      const val = course[key] !== undefined ? course[key] : (key === "hasCertificate" ? course.certificate : undefined);
+      
+      if (val !== null && val !== undefined) {
+        if (typeof val === "boolean") {
+          formData.append(key, val ? "true" : "false");
         } else {
-          formData.append(key, String(course[key]));
+          formData.append(key, String(val));
         }
       }
     });
+    
     formData.set("status", newStatus); // override status
 
     await editCourse({ id: course.id || course._id, formData });
@@ -119,7 +129,7 @@ const ShortCourses = () => {
         </button>
         {openMenuId === course.id && (
           <div className="absolute right-6 top-8 z-50 bg-white border border-gray-200 rounded-xl shadow-lg py-1 min-w-[140px]">
-            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" onClick={() => router.push(`/short-courses/${course.id}`)}>Edit Course</button>
+            {/* <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" onClick={() => router.push(`/short-courses/${course.id}`)}>Edit Course</button> */}
             <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" onClick={() => handlePublishToggle(course)}>{course.status?.toLowerCase() === "published" ? "Unpublish" : "Publish"}</button>
             <button className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors" onClick={() => handleDelete(course.id)}>Delete</button>
           </div>
@@ -150,7 +160,7 @@ const ShortCourses = () => {
           </button>
           {openMenuId === course.id && (
             <div className="absolute right-0 top-8 z-50 bg-white border border-gray-200 rounded-xl shadow-lg py-1 min-w-[140px]">
-              <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => router.push(`/short-courses/${course.id}`)}>Edit Course</button>
+              {/* <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => router.push(`/short-courses/${course.id}`)}>Edit Course</button> */}
               <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => handlePublishToggle(course)}>{course.status?.toLowerCase() === "published" ? "Unpublish" : "Publish"}</button>
               <button className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50" onClick={() => handleDelete(course.id)}>Delete</button>
             </div>
