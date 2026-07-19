@@ -57,10 +57,10 @@ const EditShortCourse = () => {
         thumbnailPreview: course.thumbnail || null,
         startLearningLink: course.link || "",
         isFree: course.isFree !== undefined ? course.isFree : (course.price === null || course.price === 0),
-        regularPrice: course.regularPrice || (course.price ? String(course.price) : ""),
-        discountedPrice: course.discountedPrice || "",
-        duration: course.duration || "",
-        certificate: course.certificate || false,
+        regularPrice: course.price ? String(course.price) : "",
+        discountedPrice: course.discountPrice ? String(course.discountPrice) : "",
+        duration: course.duration ? String(course.duration) : "",
+        certificate: course.hasCertificate || course.certificate || false,
       });
     }
   }, [fetched, courseId]);

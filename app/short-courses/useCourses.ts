@@ -85,7 +85,8 @@ export const useCourses = () => {
         ? JSON.stringify(backendError) 
         : err.response?.data?.message || "Something went wrong while updating the course";
         
-      toast.error(`Backend Error: ${errorMsg}`);
+      alert(`Backend Error: ${errorMsg}`);
+      toast.error(err.response?.data?.message || "Error updating course");
     } finally {
       setEditLoad(false);
     }
