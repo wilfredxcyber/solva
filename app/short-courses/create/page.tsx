@@ -66,6 +66,7 @@ const CreateShortCourse = () => {
       return;
     }
 
+    // Build only the fields the backend accepts
     const courseData: Record<string, any> = {
       name: form.title,
       category: form.category,
@@ -73,11 +74,20 @@ const CreateShortCourse = () => {
       description: form.description,
       link: form.startLearningLink,
       isFree: Boolean(form.isFree),
-      price: form.isFree ? 0 : (Number(form.regularPrice) || 0),
       hasCertificate: Boolean(form.certificate),
       status,
-      thumbnail: "",
     };
+
+    // Only include price if the course is NOT free
+    if (!form.isFree) {
+      courseData.price = Number(form.regularPrice) || 0;
+    }
+
+    // Only include thumbnail if a file was uploaded (omit entirely if none)
+    if (form.thumbnailPreview && form.thumbnailPreview.startsWith("http")) {
+      courseData.thumbnail = form.thumbnailPreview;
+    }
+    // If it's a local blob (just picked, not yet uploaded), skip for now
 
     await createCourse(courseData as any);
   };

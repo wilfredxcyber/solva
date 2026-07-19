@@ -105,11 +105,19 @@ const EditShortCourse = () => {
       description: form.description,
       link: form.startLearningLink,
       isFree: Boolean(form.isFree),
-      price: form.isFree ? 0 : (Number(form.regularPrice) || 0),
       hasCertificate: Boolean(form.certificate),
       status,
-      thumbnail: form.thumbnailPreview?.startsWith("http") ? form.thumbnailPreview : "",
     };
+
+    // Only include price if NOT free
+    if (!form.isFree) {
+      courseData.price = Number(form.regularPrice) || 0;
+    }
+
+    // Only include thumbnail if there's a real URL (omit entirely if none)
+    if (form.thumbnailPreview && form.thumbnailPreview.startsWith("http")) {
+      courseData.thumbnail = form.thumbnailPreview;
+    }
 
     await editCourse(courseData as any);
   };
