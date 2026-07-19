@@ -32,7 +32,7 @@ export const useCourses = () => {
   const router = useRouter();
   const [openDeleteModal, setDeleteModal] = useState(false);
 
-  const createCourse = async (courseData: CourseI) => {
+  const createCourse = async (courseData: CourseI | FormData) => {
     setLoading(true);
     try {
       const token = Cookies.get("accessToken");
@@ -40,8 +40,10 @@ export const useCourses = () => {
       const response = await axios.post(`${apis.course}`, courseData);
 
       if (response.status === 200 || response.status === 201) {
-        toast.success(`Course ${courseData.status === "Published" ? "published" : "saved as draft"} successfully!`);
-        setCourses((prev) => [...prev, courseData]);
+        const isFormData = courseData instanceof FormData;
+        const statusVal = isFormData ? courseData.get("status") : (courseData as any).status;
+        toast.success(`Course ${statusVal?.toString().toLowerCase() === "published" ? "published" : "saved as draft"} successfully!`);
+        // We omit adding to `courses` array immediately, a refresh will handle it
         router.replace("/short-courses");
       }
     } catch (error: any) {
@@ -56,26 +58,43 @@ export const useCourses = () => {
 
   const [editLoad, setEditLoad] = useState(false);
 
-  const editCourse = async (courseData: CourseI) => {
-    if (!courseData.id && !(courseData as any)._id) {
+  const editCourse = async (courseData: CourseI | Record<string, any>) => {
+    // Check if it's wrapped from the edit page or publish toggle
+    const isWrapped = !!(courseData && courseData.formData && typeof courseData.formData.append === "function");
+    const targetId = isWrapped ? courseData.id : (courseData as any).id || (courseData as any)._id;
+    const payload = isWrapped ? courseData.formData : courseData;
+
+    if (!targetId) {
       toast.error("Course ID is required for editing");
       return;
     }
 
-    const targetId = courseData.id || (courseData as any)._id;
+    console.log("editCourse payload is FormData:", payload instanceof FormData);
+    if (payload instanceof FormData) {
+      const entries = Object.fromEntries(payload.entries());
+      console.log("FormData entries:", entries);
+    } else {
+      console.log("JSON payload:", payload);
+    }
 
     setEditLoad(true);
     try {
-      const token = Cookies.get("accessToken");
-      const response = await axios.patch(`${apis.course}/${targetId}`, courseData);
+      const response = await axios.patch(`${apis.course}/${targetId}`, payload);
 
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 201) {
         toast.success("Course updated successfully");
         router.replace("/short-courses");
       }
     } catch (error: any) {
-      const err = error as AxiosError<{ message?: string }>;
-      toast.error(err.response?.data?.message || "Something went wrong while updating the course");
+      const err = error as AxiosError<{ message?: string; error?: any }>;
+      console.error("BACKEND ERROR DETAILS:", err.response?.data);
+      const backendError = err.response?.data?.error;
+      const errorMsg = backendError 
+        ? JSON.stringify(backendError) 
+        : err.response?.data?.message || "Something went wrong while updating the course";
+        
+      alert(`Backend Error: ${errorMsg}`);
+      toast.error(err.response?.data?.message || "Error updating course");
     } finally {
       setEditLoad(false);
     }
@@ -95,10 +114,11 @@ export const useCourses = () => {
 
       if (response.status === 200) {
         // Map _id to id if MongoDB is used
-        const data = response.data.data.map((item: any) => ({
+        const rawData = response.data?.data || response.data || [];
+        const dataArray = Array.isArray(rawData) ? rawData : [];
+        const data = dataArray.map((item: any) => ({
           ...item,
           id: item._id || item.id,
-          // Fallback parsing for fields if they are somehow stored in a stringified JSON
         }));
         setFetched(data);
       }

@@ -11,11 +11,14 @@ import {
   Rocket,
 } from "lucide-react";
 import { useCourses } from "../useCourses";
+import { createAxiosInstance } from "@/lib/axios";
+import { apis } from "@/lib/endpoints";
 
 const CreateShortCourse = () => {
   const router = useRouter();
   const { createCourse, loading } = useCourses();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const axiosInstance = createAxiosInstance();
 
   const [form, setForm] = useState({
     title: "",
@@ -60,28 +63,37 @@ const CreateShortCourse = () => {
     if (file) handleFile(file);
   };
 
-  const handleSave = async (status: "Published" | "Draft") => {
+  const handleSave = async (publishStatus: "published" | "draft") => {
     if (!form.title.trim()) {
       alert("Course title is required");
       return;
     }
 
-    const courseData = {
-      name: form.title,
-      category: form.category,
-      difficulty: form.difficulty,
-      description: form.description,
-      link: form.startLearningLink,
-      isFree: form.isFree,
-      price: form.isFree ? null : Number(form.regularPrice) || 0,
-      duration: form.duration,
-      certificate: form.certificate,
-      enrollment: 0,
-      thumbnail: form.thumbnailPreview || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=80&h=80&fit=crop",
-      status,
-    };
+    if (!form.thumbnail) {
+      alert("Please upload a course thumbnail image before saving.");
+      return;
+    }
 
-    await createCourse(courseData);
+    // Backend expects multipart/form-data for course creation to handle the image
+    const formData = new FormData();
+    formData.append("name", form.title);
+    formData.append("category", form.category);
+    formData.append("difficulty", form.difficulty);
+    formData.append("description", form.description);
+    formData.append("link", form.startLearningLink);
+    formData.append("duration", form.duration ? String(form.duration) : "0");
+    formData.append("price", form.regularPrice ? String(form.regularPrice) : "0");
+    formData.append("discountPrice", form.discountedPrice ? String(form.discountedPrice) : "0");
+    formData.append("status", publishStatus);
+    
+    // Note: Backend must parse these strings into booleans/numbers on their end
+    formData.append("isFree", form.isFree ? "true" : "false");
+    formData.append("hasCertificate", form.certificate ? "true" : "false");
+
+    // Append the actual file object
+    formData.append("thumbnail", form.thumbnail);
+
+    await createCourse(formData as any);
   };
 
   const handleDiscard = () => {
@@ -106,7 +118,7 @@ const CreateShortCourse = () => {
             Cancel
           </button>
           <button 
-            onClick={() => handleSave("Published")}
+            onClick={() => handleSave("published")}
             disabled={loading}
             className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-70"
           >
@@ -424,14 +436,14 @@ const CreateShortCourse = () => {
           Discard Draft
         </button>
         <button 
-            onClick={() => handleSave("Draft")}
+            onClick={() => handleSave("draft")}
             disabled={loading}
             className="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-70"
           >
             Save as Draft
           </button>
           <button 
-            onClick={() => handleSave("Published")}
+            onClick={() => handleSave("published")}
             disabled={loading}
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-70"
           >

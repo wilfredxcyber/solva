@@ -35,14 +35,41 @@ const ShortCourses = () => {
   };
 
   const handlePublishToggle = async (course: any) => {
-    const newStatus = course.status === "Published" ? "Draft" : "Published";
-    await editCourse({ ...course, status: newStatus });
+    const isPublished = course.status?.toLowerCase() === "published";
+    const newStatus = isPublished ? "draft" : "published";
+    
+    // Convert to FormData but only include fields the backend schema expects
+    const allowedKeys = [
+      "name", "category", "difficulty", "description", 
+      "link", "duration", "price", "discountPrice", 
+      "isFree", "hasCertificate", "thumbnail"
+    ];
+
+    const formData = new FormData();
+    allowedKeys.forEach(key => {
+      // Map frontend fields to backend names if they differ
+      const val = course[key] !== undefined ? course[key] : (key === "hasCertificate" ? course.certificate : undefined);
+      
+      if (val !== null && val !== undefined) {
+        if (typeof val === "boolean") {
+          formData.append(key, val ? "true" : "false");
+        } else {
+          formData.append(key, String(val));
+        }
+      }
+    });
+    
+    formData.set("status", newStatus); // override status
+
+    await editCourse({ id: course.id || course._id, formData });
     // Re-fetch courses to get the latest status
     fetchCourses();
     setOpenMenuId(null);
   };
 
-  const filteredCourses = fetched.filter((c: any) => (c.status || "Published") === activeTab);
+  const filteredCourses = fetched.filter(
+    (c: any) => (c.status?.toLowerCase() || "published") === activeTab.toLowerCase()
+  );
   const TOTAL_ENTRIES = filteredCourses.length;
   const totalPages = Math.max(1, Math.ceil(TOTAL_ENTRIES / ITEMS_PER_PAGE));
 
@@ -71,7 +98,13 @@ const ShortCourses = () => {
     <tr key={course.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
       <td className="py-4 px-6">
         <div className="flex items-center gap-3">
-          <img src={course.thumbnail} alt={course.name} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+          {course.thumbnail ? (
+            <img src={course.thumbnail} alt={course.name} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+          ) : (
+            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 text-primary font-bold text-lg">
+              {course.name?.[0]?.toUpperCase() || "C"}
+            </div>
+          )}
           <span className="font-semibold text-gray-900 text-sm max-w-[200px] truncate" title={course.name}>{course.name}</span>
         </div>
       </td>
@@ -86,8 +119,8 @@ const ShortCourses = () => {
       </td>
       <td className="py-4 px-6">
         <div className="flex items-center gap-2">
-          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${course.status === "Published" ? "bg-green-500" : "bg-gray-400"}`} />
-          <span className={`text-sm font-medium ${course.status === "Published" ? "text-green-600" : "text-gray-500"}`}>{course.status}</span>
+          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${course.status?.toLowerCase() === "published" ? "bg-green-500" : "bg-gray-400"}`} />
+          <span className={`text-sm font-medium ${course.status?.toLowerCase() === "published" ? "text-green-600" : "text-gray-500"}`}>{course.status}</span>
         </div>
       </td>
       <td className="py-4 px-6 relative">
@@ -97,7 +130,7 @@ const ShortCourses = () => {
         {openMenuId === course.id && (
           <div className="absolute right-6 top-8 z-50 bg-white border border-gray-200 rounded-xl shadow-lg py-1 min-w-[140px]">
             <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" onClick={() => router.push(`/short-courses/${course.id}`)}>Edit Course</button>
-            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" onClick={() => handlePublishToggle(course)}>{course.status === "Published" ? "Unpublish" : "Publish"}</button>
+            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" onClick={() => handlePublishToggle(course)}>{course.status?.toLowerCase() === "published" ? "Unpublish" : "Publish"}</button>
             <button className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors" onClick={() => handleDelete(course.id)}>Delete</button>
           </div>
         )}
@@ -109,7 +142,13 @@ const ShortCourses = () => {
     <div key={course.id} className="p-4 hover:bg-gray-50 transition-colors">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <img src={course.thumbnail} alt={course.name} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+          {course.thumbnail ? (
+            <img src={course.thumbnail} alt={course.name} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+          ) : (
+            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 text-primary font-bold text-lg">
+              {course.name?.[0]?.toUpperCase() || "C"}
+            </div>
+          )}
           <div className="min-w-0">
             <p className="font-semibold text-gray-900 text-sm truncate" title={course.name}>{course.name}</p>
             <span className="inline-block bg-gray-100 text-gray-600 text-xs font-medium px-2 py-0.5 rounded-full mt-1">{course.category}</span>
@@ -122,7 +161,7 @@ const ShortCourses = () => {
           {openMenuId === course.id && (
             <div className="absolute right-0 top-8 z-50 bg-white border border-gray-200 rounded-xl shadow-lg py-1 min-w-[140px]">
               <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => router.push(`/short-courses/${course.id}`)}>Edit Course</button>
-              <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => handlePublishToggle(course)}>{course.status === "Published" ? "Unpublish" : "Publish"}</button>
+              <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => handlePublishToggle(course)}>{course.status?.toLowerCase() === "published" ? "Unpublish" : "Publish"}</button>
               <button className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50" onClick={() => handleDelete(course.id)}>Delete</button>
             </div>
           )}
@@ -135,8 +174,8 @@ const ShortCourses = () => {
           <span>{(course.enrollment || 0).toLocaleString()} Students</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className={`w-2 h-2 rounded-full ${course.status === "Published" ? "bg-green-500" : "bg-gray-400"}`} />
-          <span className={`text-xs font-medium ${course.status === "Published" ? "text-green-600" : "text-gray-500"}`}>{course.status}</span>
+          <span className={`w-2 h-2 rounded-full ${course.status?.toLowerCase() === "published" ? "bg-green-500" : "bg-gray-400"}`} />
+          <span className={`text-xs font-medium ${course.status?.toLowerCase() === "published" ? "text-green-600" : "text-gray-500"}`}>{course.status}</span>
         </div>
       </div>
     </div>

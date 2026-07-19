@@ -46,7 +46,12 @@ const EditShortCourse = () => {
   useEffect(() => {
     if (!courseId || fetched.length === 0) return;
     
-    const course = fetched.find((c: any) => c.id === courseId || c._id === courseId);
+    const course = fetched.find((c: any) => c.id === courseId || c._id === courseId || String(c.id) === String(courseId));
+    
+    if (!course) {
+      console.warn("Course not found! courseId:", courseId, "Available IDs:", fetched.map((c:any) => c.id || c._id));
+    }
+
     if (course) {
       setForm({
         title: course.name || "",
@@ -57,10 +62,10 @@ const EditShortCourse = () => {
         thumbnailPreview: course.thumbnail || null,
         startLearningLink: course.link || "",
         isFree: course.isFree !== undefined ? course.isFree : (course.price === null || course.price === 0),
-        regularPrice: course.regularPrice || (course.price ? String(course.price) : ""),
-        discountedPrice: course.discountedPrice || "",
-        duration: course.duration || "",
-        certificate: course.certificate || false,
+        regularPrice: course.price ? String(course.price) : "",
+        discountedPrice: course.discountPrice ? String(course.discountPrice) : "",
+        duration: course.duration ? String(course.duration) : "",
+        certificate: course.hasCertificate || course.certificate || false,
       });
     }
   }, [fetched, courseId]);
@@ -91,28 +96,50 @@ const EditShortCourse = () => {
     if (file) handleFile(file);
   };
 
-  const handleSave = async (status: "Published" | "Draft") => {
+  const handleSave = async (publishStatus: "published" | "draft") => {
     if (!form.title.trim()) {
       alert("Course title is required");
       return;
     }
 
-    const courseData = {
-      id: courseId,
-      name: form.title,
-      category: form.category,
-      difficulty: form.difficulty,
-      description: form.description,
-      link: form.startLearningLink,
-      isFree: form.isFree,
-      price: form.isFree ? null : Number(form.regularPrice) || 0,
-      duration: form.duration,
-      certificate: form.certificate,
-      thumbnail: form.thumbnailPreview || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=80&h=80&fit=crop",
-      status,
-    };
+    // If there's a new thumbnail to upload, we MUST use FormData
+    if (form.thumbnail) {
+      const formData = new FormData();
+      formData.append("name", form.title);
+      formData.append("category", form.category);
+      formData.append("difficulty", form.difficulty || "Beginner");
+      formData.append("description", form.description);
+      formData.append("link", form.startLearningLink);
+      formData.append("duration", form.duration ? String(form.duration) : "0");
+      formData.append("price", form.regularPrice ? String(form.regularPrice) : "0");
+      formData.append("discountPrice", form.discountedPrice ? String(form.discountedPrice) : "0");
+      formData.append("status", publishStatus);
+      formData.append("isFree", form.isFree ? "true" : "false");
+      formData.append("hasCertificate", form.certificate ? "true" : "false");
+      formData.append("thumbnail", form.thumbnail);
 
-    await editCourse(courseData);
+      await editCourse({ id: courseId, formData } as any);
+    } else {
+      // Otherwise, send pure JSON to avoid multipart parsing bugs on backend PATCH
+      const jsonPayload = {
+        name: form.title,
+        category: form.category,
+        difficulty: form.difficulty || "Beginner",
+        description: form.description,
+        link: form.startLearningLink,
+        duration: form.duration ? String(form.duration) : "0",
+        price: form.regularPrice ? String(form.regularPrice) : "0",
+        discountPrice: form.discountedPrice ? String(form.discountedPrice) : "0",
+        status: publishStatus,
+        isFree: Boolean(form.isFree),
+        hasCertificate: Boolean(form.certificate),
+      };
+
+      if (!window.confirm(`Sending JSON Payload:\n${JSON.stringify(jsonPayload, null, 2)}`)) {
+        return;
+      }
+      await editCourse({ id: courseId, ...jsonPayload } as any);
+    }
   };
 
   const handleDiscard = () => {
@@ -141,7 +168,7 @@ const EditShortCourse = () => {
             Cancel
           </button>
           <button 
-            onClick={() => handleSave("Published")}
+            onClick={() => handleSave("published")}
             disabled={editLoad}
             className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-70"
           >
@@ -459,14 +486,14 @@ const EditShortCourse = () => {
           Cancel Changes
         </button>
         <button 
-          onClick={() => handleSave("Draft")}
+          onClick={() => handleSave("draft")}
           disabled={editLoad}
           className="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-70"
         >
           Save as Draft
         </button>
         <button 
-          onClick={() => handleSave("Published")}
+          onClick={() => handleSave("published")}
           disabled={editLoad}
           className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-70"
         >
