@@ -59,14 +59,22 @@ export const useCourses = () => {
   const [editLoad, setEditLoad] = useState(false);
 
   const editCourse = async (courseData: CourseI | Record<string, any>) => {
-    // Check if it's wrapped from the edit page
-    const isWrapped = courseData.formData instanceof FormData;
+    // Check if it's wrapped from the edit page or publish toggle
+    const isWrapped = !!(courseData && courseData.formData && typeof courseData.formData.append === "function");
     const targetId = isWrapped ? courseData.id : (courseData as any).id || (courseData as any)._id;
     const payload = isWrapped ? courseData.formData : courseData;
 
     if (!targetId) {
       toast.error("Course ID is required for editing");
       return;
+    }
+
+    console.log("editCourse payload is FormData:", payload instanceof FormData);
+    if (payload instanceof FormData) {
+      const entries = Object.fromEntries(payload.entries());
+      console.log("FormData entries:", entries);
+    } else {
+      console.log("JSON payload:", payload);
     }
 
     setEditLoad(true);

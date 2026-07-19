@@ -108,9 +108,9 @@ const EditShortCourse = () => {
     formData.append("difficulty", form.difficulty || "Beginner");
     formData.append("description", form.description);
     formData.append("link", form.startLearningLink);
-    formData.append("duration", String(Number(form.duration) || 0));
-    formData.append("price", String(Number(form.regularPrice) || 0));
-    formData.append("discountPrice", String(Number(form.discountedPrice) || 0));
+    formData.append("duration", form.duration ? String(form.duration) : "0");
+    formData.append("price", form.regularPrice ? String(form.regularPrice) : "0");
+    formData.append("discountPrice", form.discountedPrice ? String(form.discountedPrice) : "0");
     formData.append("status", publishStatus);
     
     // Send as strings, backend must coerce to boolean
