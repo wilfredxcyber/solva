@@ -82,8 +82,8 @@ const CreateShortCourse = () => {
     formData.append("description", form.description);
     formData.append("link", form.startLearningLink);
     formData.append("duration", form.duration ? String(form.duration) : "");
-    formData.append("price", form.regularPrice ? String(form.regularPrice) : "0");
-    formData.append("discountPrice", form.discountedPrice ? String(form.discountedPrice) : "0");
+    if (form.regularPrice) formData.append("price", String(form.regularPrice));
+    if (form.discountedPrice) formData.append("discountPrice", String(form.discountedPrice));
     formData.append("status", publishStatus);
     
     // Note: Backend must parse these strings into booleans/numbers on their end

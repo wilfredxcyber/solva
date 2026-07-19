@@ -61,11 +61,18 @@ const EditShortCourse = () => {
         thumbnail: null,
         thumbnailPreview: course.thumbnail || null,
         startLearningLink: course.link || "",
-        isFree: course.isFree !== undefined ? course.isFree : (course.price === null || course.price === 0),
+        isFree:
+          course.isFree === true ||
+          course.isFree === "true" ||
+          (course.isFree === undefined && (course.price === null || course.price === 0 || course.price === "0")),
         regularPrice: course.price ? String(course.price) : "",
         discountedPrice: course.discountPrice ? String(course.discountPrice) : "",
         duration: course.duration ? String(course.duration) : "",
-        certificate: course.hasCertificate || course.certificate || false,
+        certificate:
+          course.hasCertificate === true ||
+          course.hasCertificate === "true" ||
+          course.certificate === true ||
+          course.certificate === "true",
       });
     }
   }, [fetched, courseId]);
@@ -109,14 +116,16 @@ const EditShortCourse = () => {
     formData.append("description", form.description);
     formData.append("link", form.startLearningLink);
     formData.append("duration", form.duration ? String(form.duration) : "");
-    formData.append("price", form.regularPrice ? String(form.regularPrice) : "0");
-    formData.append("discountPrice", form.discountedPrice ? String(form.discountedPrice) : "0");
+    if (form.regularPrice) formData.append("price", String(form.regularPrice));
+    if (form.discountedPrice) formData.append("discountPrice", String(form.discountedPrice));
     formData.append("status", publishStatus);
     formData.append("isFree", form.isFree ? "true" : "false");
     formData.append("hasCertificate", form.certificate ? "true" : "false");
 
     if (form.thumbnail) {
       formData.append("thumbnail", form.thumbnail);
+    } else if (form.thumbnailPreview && form.thumbnailPreview.startsWith("http")) {
+      formData.append("thumbnail", form.thumbnailPreview);
     }
 
     await editCourse({ id: courseId, formData } as any);
