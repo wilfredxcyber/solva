@@ -96,9 +96,14 @@ const CreateShortCourse = () => {
       discountPrice: Number(form.discountedPrice) || 0,
       status: publishStatus,
       hasCertificate: Boolean(form.certificate),
-      // Use uploaded URL, or fall back to placeholder until backend provides upload endpoint
       thumbnail: thumbnailUrl || form.thumbnailPreview || PLACEHOLDER_THUMBNAIL,
     };
+
+    // DEBUG: Show exactly what we are sending so backend dev can see it's a string
+    console.log("PAYLOAD:", courseData);
+    if (!window.confirm(`Debug Payload (Click OK to submit):\n\n${JSON.stringify(courseData, null, 2)}`)) {
+      return;
+    }
 
     await createCourse(courseData as any);
   };
