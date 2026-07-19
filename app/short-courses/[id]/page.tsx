@@ -97,18 +97,29 @@ const EditShortCourse = () => {
       return;
     }
 
-    const courseData = {
-      id: courseId,
-      name: form.title,
-      description: form.description,
-      link: form.startLearningLink,
-      isFree: form.isFree,
-      price: form.isFree ? null : Number(form.regularPrice) || 0,
-      hasCertificate: form.certificate,
-      status,
-    };
+    const formData = new FormData();
+    if (courseId) formData.append("id", courseId);
+    formData.append("name", form.title);
+    formData.append("category", form.category);
+    formData.append("difficulty", form.difficulty);
+    formData.append("description", form.description);
+    formData.append("link", form.startLearningLink);
+    formData.append("isFree", String(form.isFree));
+    if (!form.isFree) {
+      formData.append("price", String(Number(form.regularPrice) || 0));
+    }
+    formData.append("hasCertificate", String(form.certificate));
+    formData.append("status", status);
 
-    await editCourse(courseData);
+    if (form.thumbnail) {
+      formData.append("thumbnail", form.thumbnail);
+    } else if (form.thumbnailPreview && form.thumbnailPreview.startsWith("http")) {
+      formData.append("thumbnail", form.thumbnailPreview);
+    } else {
+      formData.append("thumbnail", "");
+    }
+
+    await editCourse(formData as any);
   };
 
   const handleDiscard = () => {

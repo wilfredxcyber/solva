@@ -66,17 +66,26 @@ const CreateShortCourse = () => {
       return;
     }
 
-    const courseData = {
-      name: form.title,
-      description: form.description,
-      link: form.startLearningLink,
-      isFree: form.isFree,
-      price: form.isFree ? null : Number(form.regularPrice) || 0,
-      hasCertificate: form.certificate,
-      status,
-    };
+    const formData = new FormData();
+    formData.append("name", form.title);
+    formData.append("category", form.category);
+    formData.append("difficulty", form.difficulty);
+    formData.append("description", form.description);
+    formData.append("link", form.startLearningLink);
+    formData.append("isFree", String(form.isFree));
+    if (!form.isFree) {
+      formData.append("price", String(Number(form.regularPrice) || 0));
+    }
+    formData.append("hasCertificate", String(form.certificate));
+    formData.append("status", status);
+    
+    if (form.thumbnail) {
+      formData.append("thumbnail", form.thumbnail);
+    } else {
+      formData.append("thumbnail", "");
+    }
 
-    await createCourse(courseData);
+    await createCourse(formData as any);
   };
 
   const handleDiscard = () => {
