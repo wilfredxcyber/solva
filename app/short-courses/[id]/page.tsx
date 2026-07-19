@@ -97,10 +97,9 @@ const EditShortCourse = () => {
       return;
     }
 
-    let thumbnailUrl = form.thumbnailPreview?.startsWith("http") ? form.thumbnailPreview : "";
+    const PLACEHOLDER_THUMBNAIL = "https://placehold.co/600x400/7c3aed/ffffff?text=Course";
+    const thumbnailUrl = form.thumbnailPreview?.startsWith("http") ? form.thumbnailPreview : PLACEHOLDER_THUMBNAIL;
 
-    // If user picked a new file, we just use the blob for now
-    // (backend will need to handle it or we upload separately)
     const courseData: Record<string, any> = {
       id: courseId,
       name: form.title,
@@ -114,11 +113,8 @@ const EditShortCourse = () => {
       discountPrice: Number(form.discountedPrice) || 0,
       status: publishStatus,
       hasCertificate: Boolean(form.certificate),
+      thumbnail: thumbnailUrl,
     };
-
-    if (thumbnailUrl) {
-      courseData.thumbnail = thumbnailUrl;
-    }
 
     await editCourse(courseData as any);
   };

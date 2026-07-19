@@ -82,6 +82,8 @@ const CreateShortCourse = () => {
     }
 
     // Step 2: Create course with JSON
+    const PLACEHOLDER_THUMBNAIL = "https://placehold.co/600x400/7c3aed/ffffff?text=Course";
+
     const courseData: Record<string, any> = {
       name: form.title,
       category: form.category,
@@ -94,11 +96,9 @@ const CreateShortCourse = () => {
       discountPrice: Number(form.discountedPrice) || 0,
       status: publishStatus,
       hasCertificate: Boolean(form.certificate),
+      // Use uploaded URL, or fall back to placeholder until backend provides upload endpoint
+      thumbnail: thumbnailUrl || form.thumbnailPreview || PLACEHOLDER_THUMBNAIL,
     };
-
-    if (thumbnailUrl) {
-      courseData.thumbnail = thumbnailUrl;
-    }
 
     await createCourse(courseData as any);
   };
