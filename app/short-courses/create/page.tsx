@@ -105,13 +105,6 @@ const CreateShortCourse = () => {
       formData.append("thumbnail", "https://placehold.co/600x400/7c3aed/ffffff?text=Course");
     }
 
-    // DEBUG: Show exactly what we are sending in FormData
-    const entries = Object.fromEntries(formData.entries());
-    console.log("PAYLOAD (FormData):", entries);
-    if (!window.confirm(`Debug FormData Payload (Click OK to submit):\n\n${JSON.stringify(entries, null, 2)}`)) {
-      return;
-    }
-
     await createCourse(formData as any);
   };
 
