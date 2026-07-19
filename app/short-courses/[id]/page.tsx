@@ -91,14 +91,13 @@ const EditShortCourse = () => {
     if (file) handleFile(file);
   };
 
-  const handleSave = async (status: "published" | "draft") => {
+  const handleSave = async (publishStatus: "published" | "draft") => {
     if (!form.title.trim()) {
       alert("Course title is required");
       return;
     }
 
-    // Backend requires JSON with strict types (booleans, numbers — not strings)
-    const courseData = {
+    const courseData: Record<string, any> = {
       id: courseId,
       name: form.title,
       category: form.category,
@@ -109,10 +108,14 @@ const EditShortCourse = () => {
       isFree: Boolean(form.isFree),
       price: Number(form.regularPrice) || 0,
       discountPrice: Number(form.discountedPrice) || 0,
-      status,
+      status: publishStatus === "published" ? "Published" : "Draft",
       hasCertificate: Boolean(form.certificate),
-      thumbnail: form.thumbnailPreview?.startsWith("http") ? form.thumbnailPreview : "",
     };
+
+    // Only send thumbnail if it's a real http URL (omit if empty/blob)
+    if (form.thumbnailPreview && form.thumbnailPreview.startsWith("http")) {
+      courseData.thumbnail = form.thumbnailPreview;
+    }
 
     await editCourse(courseData as any);
   };

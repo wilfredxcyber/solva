@@ -60,14 +60,14 @@ const CreateShortCourse = () => {
     if (file) handleFile(file);
   };
 
-  const handleSave = async (status: "published" | "draft") => {
+  const handleSave = async (publishStatus: "published" | "draft") => {
     if (!form.title.trim()) {
       alert("Course title is required");
       return;
     }
 
-    // Backend requires JSON with strict types (booleans, numbers — not strings)
-    const courseData = {
+    // Backend requires JSON with strict types
+    const courseData: Record<string, any> = {
       name: form.title,
       category: form.category,
       difficulty: form.difficulty || "Beginner",
@@ -77,10 +77,15 @@ const CreateShortCourse = () => {
       isFree: Boolean(form.isFree),
       price: Number(form.regularPrice) || 0,
       discountPrice: Number(form.discountedPrice) || 0,
-      status,
+      // Capitalize status as backend expects: "Published" or "Draft"
+      status: publishStatus === "published" ? "Published" : "Draft",
       hasCertificate: Boolean(form.certificate),
-      thumbnail: "",
     };
+
+    // Only include thumbnail if a real file was selected (backend rejects empty string)
+    if (form.thumbnailPreview && !form.thumbnailPreview.startsWith("blob:")) {
+      courseData.thumbnail = form.thumbnailPreview;
+    }
 
     await createCourse(courseData as any);
   };
