@@ -124,6 +124,11 @@ const EditShortCourse = () => {
       formData.append("thumbnail", form.thumbnailPreview);
     }
 
+    const entries = Object.fromEntries(formData.entries());
+    if (!window.confirm(`Debug Payload (Screenshot this!):\n${JSON.stringify(entries, null, 2)}`)) {
+      return;
+    }
+
     await editCourse({ id: courseId, formData } as any);
   };
 
