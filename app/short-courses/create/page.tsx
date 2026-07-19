@@ -81,7 +81,7 @@ const CreateShortCourse = () => {
     formData.append("difficulty", form.difficulty);
     formData.append("description", form.description);
     formData.append("link", form.startLearningLink);
-    formData.append("duration", form.duration ? String(form.duration) : "0");
+    formData.append("duration", form.duration ? String(form.duration) : "");
     formData.append("price", form.regularPrice ? String(form.regularPrice) : "0");
     formData.append("discountPrice", form.discountedPrice ? String(form.discountedPrice) : "0");
     formData.append("status", publishStatus);
@@ -291,11 +291,11 @@ const CreateShortCourse = () => {
                   </label>
                   <div className="flex items-center border border-gray-200 rounded-lg px-3 py-2.5 gap-2 focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary transition">
                     <input
-                      type="number"
+                      type="text"
                       name="duration"
                       value={form.duration}
                       onChange={handleChange}
-                      placeholder="e.g. 12"
+                      placeholder="e.g. 12 months"
                       className="flex-1 text-sm text-gray-700 placeholder-gray-400 focus:outline-none bg-transparent"
                     />
                     <Clock className="w-4 h-4 text-gray-400 flex-shrink-0" />
