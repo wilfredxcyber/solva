@@ -40,7 +40,7 @@ export const useCourses = () => {
       const response = await axios.post(`${apis.course}`, courseData);
 
       if (response.status === 200 || response.status === 201) {
-        toast.success(`Course ${courseData.status === "Published" ? "published" : "saved as draft"} successfully!`);
+        toast.success(`Course ${(courseData as any).status?.toLowerCase() === "published" ? "published" : "saved as draft"} successfully!`);
         setCourses((prev) => [...prev, courseData]);
         router.replace("/short-courses");
       }
@@ -95,10 +95,11 @@ export const useCourses = () => {
 
       if (response.status === 200) {
         // Map _id to id if MongoDB is used
-        const data = response.data.data.map((item: any) => ({
+        const rawData = response.data?.data || response.data || [];
+        const dataArray = Array.isArray(rawData) ? rawData : [];
+        const data = dataArray.map((item: any) => ({
           ...item,
           id: item._id || item.id,
-          // Fallback parsing for fields if they are somehow stored in a stringified JSON
         }));
         setFetched(data);
       }

@@ -71,7 +71,13 @@ const ShortCourses = () => {
     <tr key={course.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
       <td className="py-4 px-6">
         <div className="flex items-center gap-3">
-          <img src={course.thumbnail} alt={course.name} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+          {course.thumbnail ? (
+            <img src={course.thumbnail} alt={course.name} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+          ) : (
+            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 text-primary font-bold text-lg">
+              {course.name?.[0]?.toUpperCase() || "C"}
+            </div>
+          )}
           <span className="font-semibold text-gray-900 text-sm max-w-[200px] truncate" title={course.name}>{course.name}</span>
         </div>
       </td>
@@ -109,7 +115,13 @@ const ShortCourses = () => {
     <div key={course.id} className="p-4 hover:bg-gray-50 transition-colors">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <img src={course.thumbnail} alt={course.name} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+          {course.thumbnail ? (
+            <img src={course.thumbnail} alt={course.name} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+          ) : (
+            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 text-primary font-bold text-lg">
+              {course.name?.[0]?.toUpperCase() || "C"}
+            </div>
+          )}
           <div className="min-w-0">
             <p className="font-semibold text-gray-900 text-sm truncate" title={course.name}>{course.name}</p>
             <span className="inline-block bg-gray-100 text-gray-600 text-xs font-medium px-2 py-0.5 rounded-full mt-1">{course.category}</span>
