@@ -59,7 +59,10 @@ export const useCourses = () => {
   const [editLoad, setEditLoad] = useState(false);
 
   const editCourse = async (courseData: CourseI | Record<string, any>) => {
-    const targetId = (courseData as any).id || (courseData as any)._id;
+    // Check if it's wrapped from the edit page
+    const isWrapped = courseData.formData instanceof FormData;
+    const targetId = isWrapped ? courseData.id : (courseData as any).id || (courseData as any)._id;
+    const payload = isWrapped ? courseData.formData : courseData;
 
     if (!targetId) {
       toast.error("Course ID is required for editing");
@@ -68,15 +71,22 @@ export const useCourses = () => {
 
     setEditLoad(true);
     try {
-      const response = await axios.patch(`${apis.course}/${targetId}`, courseData);
+      const response = await axios.patch(`${apis.course}/${targetId}`, payload);
 
       if (response.status === 200 || response.status === 201) {
         toast.success("Course updated successfully");
         router.replace("/short-courses");
       }
     } catch (error: any) {
-      const err = error as AxiosError<{ message?: string }>;
-      toast.error(err.response?.data?.message || "Something went wrong while updating the course");
+      const err = error as AxiosError<{ message?: string; error?: any }>;
+      console.error("BACKEND ERROR DETAILS:", err.response?.data);
+      const backendError = err.response?.data?.error;
+      const errorMsg = backendError 
+        ? JSON.stringify(backendError) 
+        : err.response?.data?.message || "Something went wrong while updating the course";
+        
+      alert(`Backend Error: ${errorMsg}`);
+      toast.error(err.response?.data?.message || "Error updating course");
     } finally {
       setEditLoad(false);
     }

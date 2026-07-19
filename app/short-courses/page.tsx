@@ -35,7 +35,8 @@ const ShortCourses = () => {
   };
 
   const handlePublishToggle = async (course: any) => {
-    const newStatus = course.status === "Published" ? "Draft" : "Published";
+    const isPublished = course.status?.toLowerCase() === "published";
+    const newStatus = isPublished ? "draft" : "published";
     await editCourse({ ...course, status: newStatus });
     // Re-fetch courses to get the latest status
     fetchCourses();
