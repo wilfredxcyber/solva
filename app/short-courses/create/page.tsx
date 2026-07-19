@@ -69,20 +69,12 @@ const CreateShortCourse = () => {
       return;
     }
 
-    let thumbnailUrl = "";
-
-    // Step 1: Upload thumbnail as multipart to get a hosted URL
-    try {
-      const thumbForm = new FormData();
-      thumbForm.append("thumbnail", form.thumbnail as Blob);
-      const uploadRes = await axiosInstance.post(`${apis.course}/upload-thumbnail`, thumbForm);
-      thumbnailUrl = uploadRes.data?.data?.url || uploadRes.data?.url || "";
-    } catch {
-      // No dedicated upload endpoint yet — skip thumbnail for now
+    if (!form.thumbnail) {
+      alert("Please upload a course thumbnail image before saving.");
+      return;
     }
 
-    // Step 2: Create course with FormData so the backend receives the file
-    // Using "true"/"false" strings for booleans, as backend tested in Hoppscotch
+    // Backend expects multipart/form-data for course creation to handle the image
     const formData = new FormData();
     formData.append("name", form.title);
     formData.append("category", form.category);
@@ -94,16 +86,12 @@ const CreateShortCourse = () => {
     formData.append("discountPrice", String(Number(form.discountedPrice) || 0));
     formData.append("status", publishStatus);
     
-    // Some validators handle boolean strings better when sent as "1" or "true"
+    // Note: Backend must parse these strings into booleans/numbers on their end
     formData.append("isFree", form.isFree ? "true" : "false");
     formData.append("hasCertificate", form.certificate ? "true" : "false");
 
-    if (form.thumbnail) {
-      formData.append("thumbnail", form.thumbnail);
-    } else {
-      // Fallback if required
-      formData.append("thumbnail", "https://placehold.co/600x400/7c3aed/ffffff?text=Course");
-    }
+    // Append the actual file object
+    formData.append("thumbnail", form.thumbnail);
 
     await createCourse(formData as any);
   };

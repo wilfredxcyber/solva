@@ -97,26 +97,29 @@ const EditShortCourse = () => {
       return;
     }
 
-    const PLACEHOLDER_THUMBNAIL = "https://placehold.co/600x400/7c3aed/ffffff?text=Course";
-    const thumbnailUrl = form.thumbnailPreview?.startsWith("http") ? form.thumbnailPreview : PLACEHOLDER_THUMBNAIL;
+    const formData = new FormData();
+    formData.append("name", form.title);
+    formData.append("category", form.category);
+    formData.append("difficulty", form.difficulty || "Beginner");
+    formData.append("description", form.description);
+    formData.append("link", form.startLearningLink);
+    formData.append("duration", String(Number(form.duration) || 0));
+    formData.append("price", String(Number(form.regularPrice) || 0));
+    formData.append("discountPrice", String(Number(form.discountedPrice) || 0));
+    formData.append("status", publishStatus);
+    
+    // Send as strings, backend must coerce to boolean
+    formData.append("isFree", form.isFree ? "true" : "false");
+    formData.append("hasCertificate", form.certificate ? "true" : "false");
 
-    const courseData: Record<string, any> = {
-      id: courseId,
-      name: form.title,
-      category: form.category,
-      difficulty: form.difficulty || "Beginner",
-      description: form.description,
-      link: form.startLearningLink,
-      duration: Number(form.duration) || 0,
-      isFree: Boolean(form.isFree),
-      price: Number(form.regularPrice) || 0,
-      discountPrice: Number(form.discountedPrice) || 0,
-      status: publishStatus,
-      hasCertificate: Boolean(form.certificate),
-      thumbnail: thumbnailUrl,
-    };
+    // Only append thumbnail if user actually picked a new file (or we have a valid string URL to send back)
+    if (form.thumbnail) {
+      formData.append("thumbnail", form.thumbnail);
+    } else if (form.thumbnailPreview && form.thumbnailPreview.startsWith("http")) {
+      formData.append("thumbnail", form.thumbnailPreview);
+    }
 
-    await editCourse(courseData as any);
+    await editCourse({ id: courseId, formData } as any);
   };
 
   const handleDiscard = () => {
