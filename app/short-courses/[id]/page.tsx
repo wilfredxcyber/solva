@@ -120,22 +120,22 @@ const EditShortCourse = () => {
 
       await editCourse({ id: courseId, formData } as any);
     } else {
-      // Otherwise, send pure JSON to avoid multipart parsing bugs on backend PATCH
+      // Otherwise, send pure JSON to bypass multipart parsing bugs and experiment with Number types
       const jsonPayload = {
         name: form.title,
         category: form.category,
         difficulty: form.difficulty || "Beginner",
         description: form.description,
         link: form.startLearningLink,
-        duration: form.duration ? String(form.duration) : "0",
-        price: form.regularPrice ? String(form.regularPrice) : "0",
-        discountPrice: form.discountedPrice ? String(form.discountedPrice) : "0",
+        duration: form.duration ? Number(form.duration) : 0,
+        price: form.regularPrice ? Number(form.regularPrice) : 0,
+        discountPrice: form.discountedPrice ? Number(form.discountedPrice) : 0,
         status: publishStatus,
         isFree: Boolean(form.isFree),
         hasCertificate: Boolean(form.certificate),
       };
 
-      if (!window.confirm(`Sending JSON Payload:\n${JSON.stringify(jsonPayload, null, 2)}`)) {
+      if (!window.confirm(`Sending JSON Payload with Numbers:\n${JSON.stringify(jsonPayload, null, 2)}`)) {
         return;
       }
       await editCourse({ id: courseId, ...jsonPayload } as any);
