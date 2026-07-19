@@ -95,8 +95,8 @@ const ShortCourses = () => {
       </td>
       <td className="py-4 px-6">
         <div className="flex items-center gap-2">
-          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${course.status === "Published" ? "bg-green-500" : "bg-gray-400"}`} />
-          <span className={`text-sm font-medium ${course.status === "Published" ? "text-green-600" : "text-gray-500"}`}>{course.status}</span>
+          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${course.status?.toLowerCase() === "published" ? "bg-green-500" : "bg-gray-400"}`} />
+          <span className={`text-sm font-medium ${course.status?.toLowerCase() === "published" ? "text-green-600" : "text-gray-500"}`}>{course.status}</span>
         </div>
       </td>
       <td className="py-4 px-6 relative">
@@ -106,7 +106,7 @@ const ShortCourses = () => {
         {openMenuId === course.id && (
           <div className="absolute right-6 top-8 z-50 bg-white border border-gray-200 rounded-xl shadow-lg py-1 min-w-[140px]">
             <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" onClick={() => router.push(`/short-courses/${course.id}`)}>Edit Course</button>
-            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" onClick={() => handlePublishToggle(course)}>{course.status === "Published" ? "Unpublish" : "Publish"}</button>
+            <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" onClick={() => handlePublishToggle(course)}>{course.status?.toLowerCase() === "published" ? "Unpublish" : "Publish"}</button>
             <button className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors" onClick={() => handleDelete(course.id)}>Delete</button>
           </div>
         )}
@@ -137,7 +137,7 @@ const ShortCourses = () => {
           {openMenuId === course.id && (
             <div className="absolute right-0 top-8 z-50 bg-white border border-gray-200 rounded-xl shadow-lg py-1 min-w-[140px]">
               <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => router.push(`/short-courses/${course.id}`)}>Edit Course</button>
-              <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => handlePublishToggle(course)}>{course.status === "Published" ? "Unpublish" : "Publish"}</button>
+              <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" onClick={() => handlePublishToggle(course)}>{course.status?.toLowerCase() === "published" ? "Unpublish" : "Publish"}</button>
               <button className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50" onClick={() => handleDelete(course.id)}>Delete</button>
             </div>
           )}
@@ -150,8 +150,8 @@ const ShortCourses = () => {
           <span>{(course.enrollment || 0).toLocaleString()} Students</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className={`w-2 h-2 rounded-full ${course.status === "Published" ? "bg-green-500" : "bg-gray-400"}`} />
-          <span className={`text-xs font-medium ${course.status === "Published" ? "text-green-600" : "text-gray-500"}`}>{course.status}</span>
+          <span className={`w-2 h-2 rounded-full ${course.status?.toLowerCase() === "published" ? "bg-green-500" : "bg-gray-400"}`} />
+          <span className={`text-xs font-medium ${course.status?.toLowerCase() === "published" ? "text-green-600" : "text-gray-500"}`}>{course.status}</span>
         </div>
       </div>
     </div>
