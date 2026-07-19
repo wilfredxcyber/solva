@@ -97,22 +97,21 @@ const EditShortCourse = () => {
       return;
     }
 
-    // Backend expects multipart/form-data (confirmed in Hoppscotch)
+    // Backend expects multipart/form-data — all fields confirmed via Hoppscotch
     const formData = new FormData();
     formData.append("name", form.title);
     formData.append("category", form.category);
     formData.append("difficulty", form.difficulty || "Beginner");
     formData.append("description", form.description);
     formData.append("link", form.startLearningLink);
+    formData.append("duration", form.duration || "0");
     formData.append("isFree", form.isFree ? "true" : "false");
-    formData.append("hasCertificate", form.certificate ? "true" : "false");
+    formData.append("price", form.isFree ? "0" : String(Number(form.regularPrice) || 0));
+    formData.append("discountPrice", String(Number(form.discountedPrice) || 0));
     formData.append("status", status);
+    formData.append("hasCertificate", form.certificate ? "true" : "false");
 
-    if (!form.isFree) {
-      formData.append("price", String(Number(form.regularPrice) || 0));
-    }
-
-    // Attach new file if user picked one
+    // Attach new thumbnail file if user picked one
     if (form.thumbnail) {
       formData.append("thumbnail", form.thumbnail);
     }
