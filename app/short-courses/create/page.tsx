@@ -93,11 +93,6 @@ const CreateShortCourse = () => {
     // Append the actual file object
     formData.append("thumbnail", form.thumbnail);
 
-    const entries = Object.fromEntries(formData.entries());
-    if (!window.confirm(`Debug Payload (Screenshot this for backend dev!):\n\n${JSON.stringify(entries, null, 2)}`)) {
-      return;
-    }
-
     await createCourse(formData as any);
   };
 
