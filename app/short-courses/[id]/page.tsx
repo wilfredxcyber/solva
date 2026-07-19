@@ -46,7 +46,12 @@ const EditShortCourse = () => {
   useEffect(() => {
     if (!courseId || fetched.length === 0) return;
     
-    const course = fetched.find((c: any) => c.id === courseId || c._id === courseId);
+    const course = fetched.find((c: any) => c.id === courseId || c._id === courseId || String(c.id) === String(courseId));
+    
+    if (!course) {
+      console.warn("Course not found! courseId:", courseId, "Available IDs:", fetched.map((c:any) => c.id || c._id));
+    }
+
     if (course) {
       setForm({
         title: course.name || "",
@@ -480,6 +485,15 @@ const EditShortCourse = () => {
           <Rocket className="w-4 h-4" />
           {editLoad ? "Updating..." : "Update Course"}
         </button>
+      </div>
+
+      {/* DEBUG PANEL */}
+      <div className="fixed bottom-0 left-0 right-0 bg-black text-white p-4 text-xs font-mono z-50 overflow-auto max-h-48 opacity-90">
+        <p><strong>DEBUG INFO:</strong></p>
+        <p>URL ID: {courseId}</p>
+        <p>Fetched count: {fetched.length}</p>
+        <p>Fetched IDs: {fetched.map((c:any) => c.id || c._id).join(", ")}</p>
+        <p>Current Form Title: {form.title}</p>
       </div>
     </div>
   );
