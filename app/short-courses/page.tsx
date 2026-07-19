@@ -37,7 +37,21 @@ const ShortCourses = () => {
   const handlePublishToggle = async (course: any) => {
     const isPublished = course.status?.toLowerCase() === "published";
     const newStatus = isPublished ? "draft" : "published";
-    await editCourse({ ...course, status: newStatus });
+    
+    // Convert to FormData to match the backend's multipart/form-data expectations
+    const formData = new FormData();
+    Object.keys(course).forEach(key => {
+      if (course[key] !== null && course[key] !== undefined) {
+        if (typeof course[key] === "boolean") {
+          formData.append(key, course[key] ? "true" : "false");
+        } else {
+          formData.append(key, String(course[key]));
+        }
+      }
+    });
+    formData.set("status", newStatus); // override status
+
+    await editCourse({ id: course.id || course._id, formData });
     // Re-fetch courses to get the latest status
     fetchCourses();
     setOpenMenuId(null);
