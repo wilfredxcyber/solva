@@ -57,7 +57,12 @@ export const useCourses = () => {
   const [editLoad, setEditLoad] = useState(false);
 
   const editCourse = async (courseData: CourseI | Record<string, any>) => {
-    const targetId = (courseData as any).id || (courseData as any)._id;
+    // Support { id, formData } shape from the edit page
+    const isWrapped = courseData.formData instanceof FormData;
+    const targetId = isWrapped
+      ? courseData.id
+      : ((courseData as any).id || (courseData as any)._id);
+    const payload = isWrapped ? courseData.formData : courseData;
 
     if (!targetId) {
       toast.error("Course ID is required for editing");
@@ -66,10 +71,9 @@ export const useCourses = () => {
 
     setEditLoad(true);
     try {
-      const token = Cookies.get("accessToken");
-      const response = await axios.patch(`${apis.course}/${targetId}`, courseData);
+      const response = await axios.patch(`${apis.course}/${targetId}`, payload);
 
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 201) {
         toast.success("Course updated successfully");
         router.replace("/short-courses");
       }

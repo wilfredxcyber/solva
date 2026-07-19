@@ -97,29 +97,27 @@ const EditShortCourse = () => {
       return;
     }
 
-    const courseData: Record<string, any> = {
-      id: courseId,
-      name: form.title,
-      category: form.category,
-      difficulty: form.difficulty || "Beginner",
-      description: form.description,
-      link: form.startLearningLink,
-      isFree: Boolean(form.isFree),
-      hasCertificate: Boolean(form.certificate),
-      status,
-    };
+    // Backend expects multipart/form-data (confirmed in Hoppscotch)
+    const formData = new FormData();
+    formData.append("name", form.title);
+    formData.append("category", form.category);
+    formData.append("difficulty", form.difficulty || "Beginner");
+    formData.append("description", form.description);
+    formData.append("link", form.startLearningLink);
+    formData.append("isFree", form.isFree ? "true" : "false");
+    formData.append("hasCertificate", form.certificate ? "true" : "false");
+    formData.append("status", status);
 
-    // Only include price if NOT free
     if (!form.isFree) {
-      courseData.price = Number(form.regularPrice) || 0;
+      formData.append("price", String(Number(form.regularPrice) || 0));
     }
 
-    // Only include thumbnail if there's a real URL (omit entirely if none)
-    if (form.thumbnailPreview && form.thumbnailPreview.startsWith("http")) {
-      courseData.thumbnail = form.thumbnailPreview;
+    // Attach new file if user picked one
+    if (form.thumbnail) {
+      formData.append("thumbnail", form.thumbnail);
     }
 
-    await editCourse(courseData as any);
+    await editCourse({ id: courseId, formData } as any);
   };
 
   const handleDiscard = () => {

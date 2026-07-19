@@ -66,30 +66,27 @@ const CreateShortCourse = () => {
       return;
     }
 
-    // Build only the fields the backend accepts
-    const courseData: Record<string, any> = {
-      name: form.title,
-      category: form.category,
-      difficulty: form.difficulty || "Beginner",
-      description: form.description,
-      link: form.startLearningLink,
-      isFree: Boolean(form.isFree),
-      hasCertificate: Boolean(form.certificate),
-      status,
-    };
+    // Backend expects multipart/form-data (confirmed in Hoppscotch)
+    const formData = new FormData();
+    formData.append("name", form.title);
+    formData.append("category", form.category);
+    formData.append("difficulty", form.difficulty || "Beginner");
+    formData.append("description", form.description);
+    formData.append("link", form.startLearningLink);
+    formData.append("isFree", form.isFree ? "true" : "false");
+    formData.append("hasCertificate", form.certificate ? "true" : "false");
+    formData.append("status", status);
 
-    // Only include price if the course is NOT free
     if (!form.isFree) {
-      courseData.price = Number(form.regularPrice) || 0;
+      formData.append("price", String(Number(form.regularPrice) || 0));
     }
 
-    // Only include thumbnail if a file was uploaded (omit entirely if none)
-    if (form.thumbnailPreview && form.thumbnailPreview.startsWith("http")) {
-      courseData.thumbnail = form.thumbnailPreview;
+    // Only attach thumbnail file if user actually picked one
+    if (form.thumbnail) {
+      formData.append("thumbnail", form.thumbnail);
     }
-    // If it's a local blob (just picked, not yet uploaded), skip for now
 
-    await createCourse(courseData as any);
+    await createCourse(formData as any);
   };
 
   const handleDiscard = () => {
