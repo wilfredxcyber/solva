@@ -60,7 +60,7 @@ const CreateShortCourse = () => {
     if (file) handleFile(file);
   };
 
-  const handleSave = async (status: "Published" | "Draft") => {
+  const handleSave = async (status: "published" | "draft") => {
     if (!form.title.trim()) {
       alert("Course title is required");
       return;
@@ -101,7 +101,7 @@ const CreateShortCourse = () => {
             Cancel
           </button>
           <button 
-            onClick={() => handleSave("Published")}
+            onClick={() => handleSave("published")}
             disabled={loading}
             className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-70"
           >
@@ -419,14 +419,14 @@ const CreateShortCourse = () => {
           Discard Draft
         </button>
         <button 
-            onClick={() => handleSave("Draft")}
+            onClick={() => handleSave("draft")}
             disabled={loading}
             className="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-70"
           >
             Save as Draft
           </button>
           <button 
-            onClick={() => handleSave("Published")}
+            onClick={() => handleSave("published")}
             disabled={loading}
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-70"
           >
