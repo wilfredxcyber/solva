@@ -42,7 +42,9 @@ const ShortCourses = () => {
     setOpenMenuId(null);
   };
 
-  const filteredCourses = fetched.filter((c: any) => (c.status || "Published") === activeTab);
+  const filteredCourses = fetched.filter(
+    (c: any) => (c.status?.toLowerCase() || "published") === activeTab.toLowerCase()
+  );
   const TOTAL_ENTRIES = filteredCourses.length;
   const totalPages = Math.max(1, Math.ceil(TOTAL_ENTRIES / ITEMS_PER_PAGE));
 
