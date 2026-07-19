@@ -56,11 +56,8 @@ export const useCourses = () => {
 
   const [editLoad, setEditLoad] = useState(false);
 
-  const editCourse = async (courseData: CourseI | FormData) => {
-    const isFormData = courseData instanceof FormData;
-    const targetId = isFormData 
-      ? (courseData.get("id") as string || courseData.get("_id") as string)
-      : (courseData.id || (courseData as any)._id);
+  const editCourse = async (courseData: CourseI | Record<string, any>) => {
+    const targetId = (courseData as any).id || (courseData as any)._id;
 
     if (!targetId) {
       toast.error("Course ID is required for editing");
