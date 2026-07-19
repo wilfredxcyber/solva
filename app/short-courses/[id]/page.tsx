@@ -97,6 +97,10 @@ const EditShortCourse = () => {
       return;
     }
 
+    let thumbnailUrl = form.thumbnailPreview?.startsWith("http") ? form.thumbnailPreview : "";
+
+    // If user picked a new file, we just use the blob for now
+    // (backend will need to handle it or we upload separately)
     const courseData: Record<string, any> = {
       id: courseId,
       name: form.title,
@@ -108,13 +112,12 @@ const EditShortCourse = () => {
       isFree: Boolean(form.isFree),
       price: Number(form.regularPrice) || 0,
       discountPrice: Number(form.discountedPrice) || 0,
-      status: publishStatus === "published" ? "Published" : "Draft",
+      status: publishStatus,
       hasCertificate: Boolean(form.certificate),
     };
 
-    // Only send thumbnail if it's a real http URL (omit if empty/blob)
-    if (form.thumbnailPreview && form.thumbnailPreview.startsWith("http")) {
-      courseData.thumbnail = form.thumbnailPreview;
+    if (thumbnailUrl) {
+      courseData.thumbnail = thumbnailUrl;
     }
 
     await editCourse(courseData as any);

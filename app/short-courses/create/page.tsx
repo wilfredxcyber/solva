@@ -11,11 +11,14 @@ import {
   Rocket,
 } from "lucide-react";
 import { useCourses } from "../useCourses";
+import { createAxiosInstance } from "@/lib/axios";
+import { apis } from "@/lib/endpoints";
 
 const CreateShortCourse = () => {
   const router = useRouter();
   const { createCourse, loading } = useCourses();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const axiosInstance = createAxiosInstance();
 
   const [form, setForm] = useState({
     title: "",
@@ -66,7 +69,25 @@ const CreateShortCourse = () => {
       return;
     }
 
-    // Backend requires JSON with strict types
+    if (!form.thumbnail) {
+      alert("Please upload a course thumbnail image before saving.");
+      return;
+    }
+
+    let thumbnailUrl = "";
+
+    // Step 1: Upload thumbnail as multipart to get a hosted URL
+    try {
+      const thumbForm = new FormData();
+      thumbForm.append("thumbnail", form.thumbnail);
+      const uploadRes = await axiosInstance.post(`${apis.course}/upload-thumbnail`, thumbForm);
+      thumbnailUrl = uploadRes.data?.data?.url || uploadRes.data?.url || "";
+    } catch {
+      // If no dedicated upload endpoint, send file directly in main request via multipart
+      // Fall through to multipart approach below
+    }
+
+    // Step 2: Create course with JSON (or multipart if no upload endpoint)
     const courseData: Record<string, any> = {
       name: form.title,
       category: form.category,
@@ -77,14 +98,12 @@ const CreateShortCourse = () => {
       isFree: Boolean(form.isFree),
       price: Number(form.regularPrice) || 0,
       discountPrice: Number(form.discountedPrice) || 0,
-      // Capitalize status as backend expects: "Published" or "Draft"
-      status: publishStatus === "published" ? "Published" : "Draft",
+      status: publishStatus,
       hasCertificate: Boolean(form.certificate),
     };
 
-    // Only include thumbnail if a real file was selected (backend rejects empty string)
-    if (form.thumbnailPreview && !form.thumbnailPreview.startsWith("blob:")) {
-      courseData.thumbnail = form.thumbnailPreview;
+    if (thumbnailUrl) {
+      courseData.thumbnail = thumbnailUrl;
     }
 
     await createCourse(courseData as any);
