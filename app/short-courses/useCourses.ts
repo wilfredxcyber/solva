@@ -32,7 +32,7 @@ export const useCourses = () => {
   const router = useRouter();
   const [openDeleteModal, setDeleteModal] = useState(false);
 
-  const createCourse = async (courseData: CourseI) => {
+  const createCourse = async (courseData: CourseI | FormData) => {
     setLoading(true);
     try {
       const token = Cookies.get("accessToken");
@@ -40,8 +40,10 @@ export const useCourses = () => {
       const response = await axios.post(`${apis.course}`, courseData);
 
       if (response.status === 200 || response.status === 201) {
-        toast.success(`Course ${(courseData as any).status?.toLowerCase() === "published" ? "published" : "saved as draft"} successfully!`);
-        setCourses((prev) => [...prev, courseData]);
+        const isFormData = courseData instanceof FormData;
+        const statusVal = isFormData ? courseData.get("status") : (courseData as any).status;
+        toast.success(`Course ${statusVal?.toString().toLowerCase() === "published" ? "published" : "saved as draft"} successfully!`);
+        // We omit adding to `courses` array immediately, a refresh will handle it
         router.replace("/short-courses");
       }
     } catch (error: any) {

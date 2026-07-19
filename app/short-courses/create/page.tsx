@@ -74,38 +74,45 @@ const CreateShortCourse = () => {
     // Step 1: Upload thumbnail as multipart to get a hosted URL
     try {
       const thumbForm = new FormData();
-      thumbForm.append("thumbnail", form.thumbnail);
+      thumbForm.append("thumbnail", form.thumbnail as Blob);
       const uploadRes = await axiosInstance.post(`${apis.course}/upload-thumbnail`, thumbForm);
       thumbnailUrl = uploadRes.data?.data?.url || uploadRes.data?.url || "";
     } catch {
       // No dedicated upload endpoint yet — skip thumbnail for now
     }
 
-    // Step 2: Create course with JSON
-    const PLACEHOLDER_THUMBNAIL = "https://placehold.co/600x400/7c3aed/ffffff?text=Course";
+    // Step 2: Create course with FormData so the backend receives the file
+    // Using "true"/"false" strings for booleans, as backend tested in Hoppscotch
+    const formData = new FormData();
+    formData.append("name", form.title);
+    formData.append("category", form.category);
+    formData.append("difficulty", form.difficulty || "Beginner");
+    formData.append("description", form.description);
+    formData.append("link", form.startLearningLink);
+    formData.append("duration", String(Number(form.duration) || 0));
+    formData.append("price", String(Number(form.regularPrice) || 0));
+    formData.append("discountPrice", String(Number(form.discountedPrice) || 0));
+    formData.append("status", publishStatus);
+    
+    // Some validators handle boolean strings better when sent as "1" or "true"
+    formData.append("isFree", form.isFree ? "true" : "false");
+    formData.append("hasCertificate", form.certificate ? "true" : "false");
 
-    const courseData: Record<string, any> = {
-      name: form.title,
-      category: form.category,
-      difficulty: form.difficulty || "Beginner",
-      description: form.description,
-      link: form.startLearningLink,
-      duration: Number(form.duration) || 0,
-      isFree: Boolean(form.isFree),
-      price: Number(form.regularPrice) || 0,
-      discountPrice: Number(form.discountedPrice) || 0,
-      status: publishStatus,
-      hasCertificate: Boolean(form.certificate),
-      thumbnail: thumbnailUrl || form.thumbnailPreview || PLACEHOLDER_THUMBNAIL,
-    };
+    if (form.thumbnail) {
+      formData.append("thumbnail", form.thumbnail);
+    } else {
+      // Fallback if required
+      formData.append("thumbnail", "https://placehold.co/600x400/7c3aed/ffffff?text=Course");
+    }
 
-    // DEBUG: Show exactly what we are sending so backend dev can see it's a string
-    console.log("PAYLOAD:", courseData);
-    if (!window.confirm(`Debug Payload (Click OK to submit):\n\n${JSON.stringify(courseData, null, 2)}`)) {
+    // DEBUG: Show exactly what we are sending in FormData
+    const entries = Object.fromEntries(formData.entries());
+    console.log("PAYLOAD (FormData):", entries);
+    if (!window.confirm(`Debug FormData Payload (Click OK to submit):\n\n${JSON.stringify(entries, null, 2)}`)) {
       return;
     }
 
-    await createCourse(courseData as any);
+    await createCourse(formData as any);
   };
 
   const handleDiscard = () => {
