@@ -37,7 +37,9 @@ const Notifications = () => {
     try {
       setLoading(true);
       const res = await axios.get("/notification/admin/all");
-      if (res.status === 200) setNotifications(res.data.data);
+      if (res.status === 200) {
+        setNotifications(Array.isArray(res.data?.data) ? res.data.data : []);
+      }
     } catch (error: any) {
       const err = error as AxiosError<{ message?: string }>;
       toast.error(

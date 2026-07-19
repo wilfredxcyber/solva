@@ -21,7 +21,7 @@ export const useAllUsers = () => {
       });
 
       if (response.status === 200) {
-        setUsers(response.data.data);
+        setUsers(Array.isArray(response.data?.data) ? response.data.data : []);
         setLoading(false);
         // toast.success("Users fetched Successfully");
       }
