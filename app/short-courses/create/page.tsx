@@ -69,11 +69,6 @@ const CreateShortCourse = () => {
       return;
     }
 
-    if (!form.thumbnail) {
-      alert("Please upload a course thumbnail image before saving.");
-      return;
-    }
-
     let thumbnailUrl = "";
 
     // Step 1: Upload thumbnail as multipart to get a hosted URL
@@ -83,11 +78,10 @@ const CreateShortCourse = () => {
       const uploadRes = await axiosInstance.post(`${apis.course}/upload-thumbnail`, thumbForm);
       thumbnailUrl = uploadRes.data?.data?.url || uploadRes.data?.url || "";
     } catch {
-      // If no dedicated upload endpoint, send file directly in main request via multipart
-      // Fall through to multipart approach below
+      // No dedicated upload endpoint yet — skip thumbnail for now
     }
 
-    // Step 2: Create course with JSON (or multipart if no upload endpoint)
+    // Step 2: Create course with JSON
     const courseData: Record<string, any> = {
       name: form.title,
       category: form.category,
