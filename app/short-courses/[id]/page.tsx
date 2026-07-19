@@ -97,26 +97,24 @@ const EditShortCourse = () => {
       return;
     }
 
-    // Backend expects multipart/form-data — all fields confirmed via Hoppscotch
-    const formData = new FormData();
-    formData.append("name", form.title);
-    formData.append("category", form.category);
-    formData.append("difficulty", form.difficulty || "Beginner");
-    formData.append("description", form.description);
-    formData.append("link", form.startLearningLink);
-    formData.append("duration", form.duration || "0");
-    formData.append("isFree", form.isFree ? "true" : "false");
-    formData.append("price", form.isFree ? "0" : String(Number(form.regularPrice) || 0));
-    formData.append("discountPrice", String(Number(form.discountedPrice) || 0));
-    formData.append("status", status);
-    formData.append("hasCertificate", form.certificate ? "true" : "false");
+    // Backend requires JSON with strict types (booleans, numbers — not strings)
+    const courseData = {
+      id: courseId,
+      name: form.title,
+      category: form.category,
+      difficulty: form.difficulty || "Beginner",
+      description: form.description,
+      link: form.startLearningLink,
+      duration: Number(form.duration) || 0,
+      isFree: Boolean(form.isFree),
+      price: Number(form.regularPrice) || 0,
+      discountPrice: Number(form.discountedPrice) || 0,
+      status,
+      hasCertificate: Boolean(form.certificate),
+      thumbnail: form.thumbnailPreview?.startsWith("http") ? form.thumbnailPreview : "",
+    };
 
-    // Attach new thumbnail file if user picked one
-    if (form.thumbnail) {
-      formData.append("thumbnail", form.thumbnail);
-    }
-
-    await editCourse({ id: courseId, formData } as any);
+    await editCourse(courseData as any);
   };
 
   const handleDiscard = () => {
