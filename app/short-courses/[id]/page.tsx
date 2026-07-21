@@ -61,11 +61,18 @@ const EditShortCourse = () => {
         thumbnail: null,
         thumbnailPreview: course.thumbnail || null,
         startLearningLink: course.link || "",
-        isFree: course.isFree !== undefined ? course.isFree : (course.price === null || course.price === 0),
+        isFree:
+          course.isFree === true ||
+          course.isFree === "true" ||
+          (course.isFree === undefined && (course.price === null || course.price === 0 || course.price === "0")),
         regularPrice: course.price ? String(course.price) : "",
         discountedPrice: course.discountPrice ? String(course.discountPrice) : "",
         duration: course.duration ? String(course.duration) : "",
-        certificate: course.hasCertificate || course.certificate || false,
+        certificate:
+          course.hasCertificate === true ||
+          course.hasCertificate === "true" ||
+          course.certificate === true ||
+          course.certificate === "true",
       });
     }
   }, [fetched, courseId]);
@@ -102,44 +109,26 @@ const EditShortCourse = () => {
       return;
     }
 
-    // If there's a new thumbnail to upload, we MUST use FormData
+    const formData = new FormData();
+    formData.append("name", form.title);
+    formData.append("category", form.category);
+    formData.append("difficulty", form.difficulty || "Beginner");
+    formData.append("description", form.description);
+    formData.append("link", form.startLearningLink);
+    formData.append("duration", form.duration ? String(form.duration) : "");
+    if (form.regularPrice) formData.append("price", String(form.regularPrice));
+    if (form.discountedPrice) formData.append("discountPrice", String(form.discountedPrice));
+    formData.append("status", publishStatus);
+    formData.append("isFree", form.isFree ? "true" : "false");
+    formData.append("hasCertificate", form.certificate ? "true" : "false");
+
     if (form.thumbnail) {
-      const formData = new FormData();
-      formData.append("name", form.title);
-      formData.append("category", form.category);
-      formData.append("difficulty", form.difficulty || "Beginner");
-      formData.append("description", form.description);
-      formData.append("link", form.startLearningLink);
-      formData.append("duration", form.duration ? String(form.duration) : "0");
-      formData.append("price", form.regularPrice ? String(form.regularPrice) : "0");
-      formData.append("discountPrice", form.discountedPrice ? String(form.discountedPrice) : "0");
-      formData.append("status", publishStatus);
-      formData.append("isFree", form.isFree ? "true" : "false");
-      formData.append("hasCertificate", form.certificate ? "true" : "false");
       formData.append("thumbnail", form.thumbnail);
-
-      await editCourse({ id: courseId, formData } as any);
-    } else {
-      // Otherwise, send pure JSON to avoid multipart parsing bugs on backend PATCH
-      const jsonPayload = {
-        name: form.title,
-        category: form.category,
-        difficulty: form.difficulty || "Beginner",
-        description: form.description,
-        link: form.startLearningLink,
-        duration: form.duration ? String(form.duration) : "0",
-        price: form.regularPrice ? String(form.regularPrice) : "0",
-        discountPrice: form.discountedPrice ? String(form.discountedPrice) : "0",
-        status: publishStatus,
-        isFree: Boolean(form.isFree),
-        hasCertificate: Boolean(form.certificate),
-      };
-
-      if (!window.confirm(`Sending JSON Payload:\n${JSON.stringify(jsonPayload, null, 2)}`)) {
-        return;
-      }
-      await editCourse({ id: courseId, ...jsonPayload } as any);
+    } else if (form.thumbnailPreview && form.thumbnailPreview.startsWith("http")) {
+      formData.append("thumbnail", form.thumbnailPreview);
     }
+
+    await editCourse({ id: courseId, formData } as any);
   };
 
   const handleDiscard = () => {
@@ -341,11 +330,11 @@ const EditShortCourse = () => {
                   </label>
                   <div className="flex items-center border border-gray-200 rounded-lg px-3 py-2.5 gap-2 focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary transition">
                     <input
-                      type="number"
+                      type="text"
                       name="duration"
                       value={form.duration}
                       onChange={handleChange}
-                      placeholder="e.g. 12"
+                      placeholder="e.g. 12 months"
                       className="flex-1 text-sm text-gray-700 placeholder-gray-400 focus:outline-none bg-transparent"
                     />
                     <Clock className="w-4 h-4 text-gray-400 flex-shrink-0" />
