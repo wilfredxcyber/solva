@@ -116,8 +116,8 @@ const EditShortCourse = () => {
     formData.append("description", form.description);
     formData.append("link", form.startLearningLink);
     formData.append("duration", form.duration ? String(form.duration) : "");
-    if (form.regularPrice) formData.append("price", String(form.regularPrice));
-    if (form.discountedPrice) formData.append("discountPrice", String(form.discountedPrice));
+    formData.append("price", form.regularPrice ? String(form.regularPrice) : "0");
+    formData.append("discountPrice", form.discountedPrice ? String(form.discountedPrice) : "0");
     formData.append("status", publishStatus);
     formData.append("isFree", form.isFree ? "true" : "false");
     formData.append("hasCertificate", form.certificate ? "true" : "false");

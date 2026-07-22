@@ -78,7 +78,11 @@ export const createAxiosInstance = (): AxiosInstance => {
 
       const token = Cookies.get("accessToken");
       if (token) {
-        (config.headers as any).Authorization = `Bearer ${token}`;
+        if (config.headers && typeof config.headers.set === 'function') {
+          config.headers.set("Authorization", `Bearer ${token}`);
+        } else {
+          (config.headers as any).Authorization = `Bearer ${token}`;
+        }
       }
 
       return config;
