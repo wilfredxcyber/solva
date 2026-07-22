@@ -54,35 +54,29 @@ export const createAxiosInstance = (): AxiosInstance => {
   // Request interceptor: attach token and allow multipart uploads
   instance.interceptors.request.use(
     (config) => {
-      config.headers = config.headers ?? {};
+      // IMPORTANT: Never reassign config.headers to a plain object.
+      // Axios v1 always provides an AxiosHeaders instance; destroying it breaks header merging.
+      if (!config.headers) {
+        config.headers = new AxiosHeaders();
+      }
 
       if (config.data instanceof FormData) {
-        if (config.headers instanceof AxiosHeaders) {
-          config.headers.delete("Content-Type");
-        } else {
-          delete (config.headers as Record<string, unknown>)["Content-Type"];
-          delete (config.headers as Record<string, unknown>)["content-type"];
-        }
-      } else if (config.headers instanceof AxiosHeaders) {
+        // For FormData, we MUST delete Content-Type so the browser can set it
+        // automatically with the correct multipart boundary string.
+        // Using .delete() on the AxiosHeaders instance is the only reliable way.
+        config.headers.delete("Content-Type");
+      } else {
+        // For JSON requests, ensure Content-Type is set
         if (!config.headers.has("Content-Type")) {
           config.headers.set("Content-Type", "application/json");
         }
-      } else if (
-        !("Content-Type" in (config.headers as Record<string, unknown>)) &&
-        !("content-type" in (config.headers as Record<string, unknown>))
-      ) {
-        (config.headers as Record<string, unknown>)["Content-Type"] = "application/json";
       }
 
       if (typeof window === "undefined") return config;
 
       const token = Cookies.get("accessToken");
       if (token) {
-        if (config.headers && typeof config.headers.set === 'function') {
-          config.headers.set("Authorization", `Bearer ${token}`);
-        } else {
-          (config.headers as any).Authorization = `Bearer ${token}`;
-        }
+        config.headers.set("Authorization", `Bearer ${token}`);
       }
 
       return config;
