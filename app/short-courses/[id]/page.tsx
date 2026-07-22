@@ -124,8 +124,6 @@ const EditShortCourse = () => {
 
     if (form.thumbnail) {
       formData.append("thumbnail", form.thumbnail);
-    } else if (form.thumbnailPreview && form.thumbnailPreview.startsWith("http")) {
-      formData.append("thumbnail", form.thumbnailPreview);
     }
 
     await editCourse({ id: courseId, formData } as any);
