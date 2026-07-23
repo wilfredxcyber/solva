@@ -8,20 +8,22 @@ import { useRouter } from "next/navigation";
 
 export interface CourseI {
   id?: string;
+  _id?: string;
   name: string;
   category?: string;
   difficulty?: string;
   description?: string;
   link?: string; // previously startLearningLink
-  isFree?: boolean;
-  price?: number | null;
+  isFree?: boolean | string; // backend may return "true"/"false" strings
+  price?: number | null | string;
+  discountPrice?: number | null | string;
   regularPrice?: string;
   discountedPrice?: string;
   duration?: string;
-  certificate?: boolean;
+  certificate?: boolean | string; // legacy field
+  hasCertificate?: boolean | string; // current backend field name
   thumbnail?: string;
-  status?: "Published" | "Draft";
-  enrollment?: number;
+  status?: string;
   createdAt?: string;
 }
 
@@ -58,28 +60,22 @@ export const useCourses = () => {
 
   const [editLoad, setEditLoad] = useState(false);
 
-  const editCourse = async (courseData: CourseI | Record<string, any>) => {
-    // Check if it's wrapped from the edit page or publish toggle
-    const isWrapped = !!(courseData && courseData.formData && typeof courseData.formData.append === "function");
-    const targetId = isWrapped ? courseData.id : (courseData as any).id || (courseData as any)._id;
-    const payload = isWrapped ? courseData.formData : courseData;
+  const editCourse = async (courseData: { id: string; formData: FormData }) => {
+    const { id: targetId, formData } = courseData;
 
     if (!targetId) {
       toast.error("Course ID is required for editing");
       return;
     }
 
-    console.log("editCourse payload is FormData:", payload instanceof FormData);
-    if (payload instanceof FormData) {
-      const entries = Object.fromEntries(payload.entries());
-      console.log("FormData entries:", entries);
-    } else {
-      console.log("JSON payload:", payload);
+    if (!(formData instanceof FormData)) {
+      toast.error("Invalid payload: expected FormData");
+      return;
     }
 
     setEditLoad(true);
     try {
-      const response = await axios.patch(`${apis.course}/${targetId}`, payload);
+      const response = await axios.patch(`${apis.course}/${targetId}`, formData);
 
       if (response.status === 200 || response.status === 201) {
         toast.success("Course updated successfully");
@@ -89,16 +85,17 @@ export const useCourses = () => {
       const err = error as AxiosError<{ message?: string; error?: any }>;
       console.error("BACKEND ERROR DETAILS:", err.response?.data);
       const backendError = err.response?.data?.error;
-      const errorMsg = backendError 
-        ? JSON.stringify(backendError) 
+      const errorMsg = backendError
+        ? JSON.stringify(backendError, null, 2)
         : err.response?.data?.message || "Something went wrong while updating the course";
-        
-      alert(`Backend Error: ${errorMsg}`);
+
+      alert(`Backend Error:\n\n${errorMsg}`);
       toast.error(err.response?.data?.message || "Error updating course");
     } finally {
       setEditLoad(false);
     }
   };
+
 
   const [fetched, setFetched] = useState<CourseI[]>([]);
   const [loadFetch, setLoadFetch] = useState(true);

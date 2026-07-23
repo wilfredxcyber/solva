@@ -126,7 +126,7 @@ const EditShortCourse = () => {
       formData.append("thumbnail", form.thumbnail);
     }
 
-    await editCourse({ id: courseId, formData } as any);
+    await editCourse({ id: courseId, formData });
   };
 
   const handleDiscard = () => {

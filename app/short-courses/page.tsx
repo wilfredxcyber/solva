@@ -37,32 +37,23 @@ const ShortCourses = () => {
   const handlePublishToggle = async (course: any) => {
     const isPublished = course.status?.toLowerCase() === "published";
     const newStatus = isPublished ? "draft" : "published";
-    
-    // Convert to FormData but only include fields the backend schema expects
-    const allowedKeys = [
-      "name", "category", "difficulty", "description", 
-      "link", "duration", "price", "discountPrice", 
-      "isFree", "hasCertificate", "thumbnail"
-    ];
 
+    // Build FormData with ONLY the exact fields the backend schema accepts
     const formData = new FormData();
-    allowedKeys.forEach(key => {
-      // Map frontend fields to backend names if they differ
-      const val = course[key] !== undefined ? course[key] : (key === "hasCertificate" ? course.certificate : undefined);
-      
-      if (val !== null && val !== undefined) {
-        if (typeof val === "boolean") {
-          formData.append(key, val ? "true" : "false");
-        } else {
-          formData.append(key, String(val));
-        }
-      }
-    });
-    
-    formData.set("status", newStatus); // override status
+    formData.append("name", course.name || "");
+    formData.append("category", course.category || "");
+    formData.append("difficulty", course.difficulty || "Beginner");
+    formData.append("description", course.description || "");
+    formData.append("link", course.link || "");
+    formData.append("duration", course.duration ? String(course.duration) : "");
+    formData.append("price", course.price ? String(course.price) : "0");
+    formData.append("discountPrice", course.discountPrice ? String(course.discountPrice) : "0");
+    formData.append("isFree", (course.isFree === true || course.isFree === "true") ? "true" : "false");
+    formData.append("hasCertificate", (course.hasCertificate === true || course.hasCertificate === "true" || course.certificate === true || course.certificate === "true") ? "true" : "false");
+    formData.append("status", newStatus);
+    // Do NOT append thumbnail — sending a string URL crashes the Multer parser
 
     await editCourse({ id: course.id || course._id, formData });
-    // Re-fetch courses to get the latest status
     fetchCourses();
     setOpenMenuId(null);
   };
